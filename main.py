@@ -5,6 +5,7 @@ import qrcode
 import io
 import base64
 import sys
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
@@ -52,11 +53,11 @@ def find(collection, query={}):
 def insert_one(collection, document):
     return db[collection].insert_one(document)
 
-def get_next_ticket_number():
-    tickets = list(tickets_col.find())
-    if tickets:
-        last_ticket = max(tickets, key=lambda x: x["ticket_number"])
-        return last_ticket["ticket_number"] + 1
+def get_next_card_number():
+    users = list(users_col.find())
+    if users:
+        last_user = max(users, key=lambda x: x.get("card_number", 0))
+        return last_user.get("card_number", 0) + 1
     return 1
 
 # =====================
@@ -66,7 +67,7 @@ def ensure_admin():
     if users_col.count_documents({"username": "admin"}) == 0:
         admin_user = {
             "username": "admin",
-            "password": "22@22",  # كلمة مرور الأدمن الجديدة
+            "password": "22@22",  
             "full_name": "مدير النادي",
             "phone": "0000000000",
             "national_id": "000000000000",
@@ -102,7 +103,41 @@ def user_dashboard():
     if "user" not in session or session["user"]["role"] != "user":
         flash("❌ يجب تسجيل الدخول كمستخدم للوصول لهذه الصفحة")
         return redirect(url_for("login"))
-    return render_template("user.html", user=session.get("user"))
+
+    # جلب بيانات المستخدم من قاعدة البيانات
+    username = session["user"]["username"]
+    user = users_col.find_one({"username": username})
+
+    if not user:
+        flash("❌ خطأ في جلب بيانات المستخدم")
+        return redirect(url_for("login"))
+
+    # توليد رقم عضوية إذا لم يكن موجود
+    if "card_number" not in user:
+        card_number = get_next_card_number()
+        users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
+        user["card_number"] = card_number
+
+    # حساب تاريخ التسجيل وصلاحية البطاقة
+    registration_date = user.get("registration_date", datetime.now())
+    if isinstance(registration_date, str):
+        registration_date = datetime.strptime(registration_date, "%Y-%m-%d")
+    expiry_date = registration_date + timedelta(days=180)
+
+    # حفظ تاريخ التسجيل إذا لم يكن موجود
+    if "registration_date" not in user:
+        users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
+
+    # توليد باركود QR يحتوي على رابط البطاقة
+    qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
+
+    return render_template(
+        "user.html",
+        user=user,
+        registration_date=registration_date.strftime("%d/%m/%Y"),
+        expiry_date=expiry_date.strftime("%d/%m/%Y"),
+        qr_code=qr_code
+    )
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -110,13 +145,11 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        # تسجيل دخول مباشر للأدمن
         if username == "admin" and password == "22@22":
             session["user"] = {"username": "admin", "role": "admin"}
             flash("✅ تم تسجيل الدخول كأدمن")
             return redirect(url_for("admin_dashboard"))
 
-        # تسجيل دخول المستخدمين العاديين
         user = users_col.find_one({"username": username, "password": password})
         if user:
             session["user"] = {"username": user["username"], "role": "user"}
@@ -135,19 +168,34 @@ def register():
         password = request.form["password"]
         full_name = request.form.get("full_name", "")
         phone = request.form.get("phone", "")
+        address = request.form.get("address", "")
+        national_id = request.form.get("national_id", "")
+        photo_url = request.form.get("photo_url", "")
+
         if users_col.find_one({"username": username}):
             flash("❌ اسم المستخدم موجود بالفعل")
             return redirect(url_for("register"))
+
+        card_number = get_next_card_number()
+        registration_date = datetime.now().strftime("%Y-%m-%d")
+
         new_user = {
             "username": username,
             "password": password,
             "full_name": full_name,
             "phone": phone,
-            "role": "user"
+            "address": address,
+            "national_id": national_id,
+            "photo_url": photo_url,
+            "role": "user",
+            "card_number": card_number,
+            "registration_date": registration_date
         }
+
         users_col.insert_one(new_user)
         flash(f"✅ تم إنشاء الحساب بنجاح: {username}")
         return redirect(url_for("login"))
+
     return render_template("register.html")
 
 @app.route("/logout")
@@ -155,17 +203,6 @@ def logout():
     session.pop("user", None)
     flash("✅ تم تسجيل الخروج")
     return redirect(url_for("index"))
-
-@app.route("/tickets/new", methods=["POST"])
-def new_ticket():
-    if "user" not in session:
-        flash("❌ يجب تسجيل الدخول لإنشاء تذكرة")
-        return redirect(url_for("login"))
-    ticket_number = get_next_ticket_number()
-    ticket_data = {"ticket_number": ticket_number, "user": session["user"]["username"]}
-    insert_one("tickets", ticket_data)
-    qr_code = generate_qr(str(ticket_number))
-    return render_template("ticket.html", ticket=ticket_data, qr_code=qr_code, user=session.get("user"))
 
 # =====================
 # Run Server
