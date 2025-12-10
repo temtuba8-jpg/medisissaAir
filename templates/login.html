@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول - نادي مديسيسة</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+body { 
+    font-family:'Cairo',sans-serif; 
+    background: linear-gradient(135deg, #8B0000, #FFA500); /* تدرج من أحمر داكن إلى برتقالي ذهبي */
+    color:#fff; 
+    margin:0; 
+    padding:0; 
+    display:flex; 
+    justify-content:center; 
+    align-items:center; 
+    min-height:100vh; 
+}
+
+.container {
+    width:100%;
+    max-width:400px;
+    text-align:center;
+    padding: 20px;
+}
+
+header {
+    margin-bottom: 20px;
+}
+
+header img.logo {
+    width: 100px;
+    margin-bottom: 15px;
+    animation: heartbeat 1s infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+form { 
+    background: rgba(255, 255, 255, 0.9); /* خلفية فاتحة شفافة قليلاً */
+    color: #330000;
+    padding:20px; 
+    border:2px solid gold; 
+    border-radius:12px; 
+    display:flex; 
+    flex-direction:column;
+    gap:10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+}
+
+input { 
+    width:100%; 
+    padding:10px; 
+    border:1px solid #ccc; 
+    border-radius:5px; 
+    box-sizing:border-box;
+}
+
+button { 
+    width:100%; 
+    background:gold; 
+    border:none; 
+    padding:10px; 
+    border-radius:5px; 
+    cursor:pointer; 
+    font-weight:bold; 
+    transition: background 0.3s;
+    color:#8B0000;
+    font-size:1em;
+}
+
+button:hover {
+    background:#e6b800;
+}
+
+.error { 
+    color:red; 
+    margin-top:10px; 
+}
+
+.register-link {
+    margin-top:15px;
+    font-size:0.95em;
+}
+
+.register-link a {
+    color:#330000;
+    font-weight:bold;
+    text-decoration:none;
+    transition: color 0.3s;
+}
+
+.register-link a:hover {
+    color:#8B0000;
+}
+
+@media(max-width:500px) {
+    header img.logo { width: 80px; }
+    form { padding:15px; }
+    button { padding:8px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="شعار النادي" class="logo">
+        <h2>تسجيل الدخول</h2>
+    </header>
+
+    <form method="POST">
+        <input type="text" name="username" placeholder="اسم المستخدم" required>
+        <input type="password" name="password" placeholder="كلمة المرور" required>
+        <button type="submit">تسجيل الدخول</button>
+        {% if error %}
+        <p class="error">{{ error }}</p>
+        {% endif %}
+    </form>
+
+    <div class="register-link">
+        <p>ليس لديك حساب؟ <a href="{{ url_for('register') }}">تسجيل مستخدم جديد</a></p>
+    </div>
+</div>
+</body>
+</html>

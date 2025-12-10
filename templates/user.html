@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>صفحة العضو - نادي مديسيسة</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+body { font-family:'Cairo',sans-serif; background:#fff8f0; color:#330000; margin:0; padding:0; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+.user-card { width:90%; max-width:400px; border:2px solid gold; border-radius:12px; padding:20px; background:#fffbe6; text-align:center; }
+.user-card img { width:150px; border-radius:50%; }
+button { background:gold; border:none; padding:10px 20px; border-radius:5px; cursor:pointer; margin:5px; font-weight:bold; }
+</style>
+</head>
+<body>
+<div class="user-card">
+<img src="{{ user.photo_url }}" alt="صورة العضو">
+<h2>{{ user.fullname }}</h2>
+<p>رقم العضوية: {{ user.membership_id }}</p>
+<p>العنوان: {{ user.address }}</p>
+<p>رقم الهاتف: {{ user.phone }}</p>
+<p>الرقم الوطني: {{ user.national_id }}</p>
+<a href="{{ url_for('index') }}"><button>العودة للرئيسية</button></a>
+<a href="{{ url_for('logout') }}"><button>تسجيل الخروج</button></a>
+</div>
+</body>
+</html>
