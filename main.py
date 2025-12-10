@@ -1,14 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+# main.py
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 import qrcode
 import io
 import base64
 import sys
+import os
+import traceback
 from datetime import datetime, timedelta
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
+
+# ------------ إعدادات الملفات المرفوعة ------------
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), "static", "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+ALLOWED_EXT = {"png", "jpg", "jpeg", "gif"}
 
 # =====================
 # اتصال MongoDB
@@ -38,208 +47,244 @@ except Exception as e:
 # =====================
 # Helpers
 # =====================
-def generate_qr(data):
-    qr = qrcode.QRCode(box_size=6, border=2)
-    qr.add_data(data)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
+def allowed_file(filename):
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+    return ext in ALLOWED_EXT
 
-    buffer = io.BytesIO()
-    img.save(buffer, format="PNG")
-    return base64.b64encode(buffer.getvalue()).decode("utf-8")
+def save_photo(file_storage):
+    """
+    يحفظ الصورة في static/uploads ويرجع مسار نسبي للعرض (مثال: /static/uploads/...)
+    """
+    if not file_storage:
+        return ""
+    filename = secure_filename(file_storage.filename)
+    if filename == "" or not allowed_file(filename):
+        return ""
+    ts = datetime.now().strftime("%Y%m%d%H%M%S")
+    filename = f"{ts}_{filename}"
+    path = os.path.join(UPLOAD_FOLDER, filename)
+    file_storage.save(path)
+    # نعيد المسار النسبي للعرض في القالب
+    return url_for("static", filename=f"uploads/{filename}")
 
+def generate_qr_data_uri(data):
+    """
+    يولد صورة QR كـ data URI جاهزة للاستخدام في <img src="...">
+    """
+    try:
+        qr = qrcode.QRCode(box_size=6, border=2)
+        qr.add_data(data)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        return f"data:image/png;base64,{b64}"
+    except Exception:
+        traceback.print_exc()
+        return ""
 
 def get_next_card_number():
-    users = list(users_col.find())
+    users = list(users_col.find({}, {"card_number": 1}))
     if users:
-        last_user = max(users, key=lambda x: x.get("card_number", 0))
-        return last_user.get("card_number", 0) + 1
+        last = max((u.get("card_number", 0) for u in users), default=0)
+        return last + 1
     return 1
 
-
 # =====================
-# إنشاء أدمن افتراضي
+# إنشـاء أدمن افتراضي إن لم يكن موجود
 # =====================
 def ensure_admin():
-    if users_col.count_documents({"username": "admin"}) == 0:
-        admin_user = {
-            "username": "admin",
-            "password": "22@22",
-            "full_name": "مدير النادي",
-            "phone": "0000000000",
-            "national_id": "000000000000",
-            "address": "المدينة",
-            "photo_url": "",
-            "role": "admin"
-        }
-        users_col.insert_one(admin_user)
-        print("✅ تم إنشاء الأدمن الافتراضي")
-    else:
-        print("ℹ️ الأدمن موجود بالفعل")
-
+    try:
+        if users_col.count_documents({"username": "admin"}) == 0:
+            admin_user = {
+                "username": "admin",
+                "password": "22@22",   # كما طلبت
+                "full_name": "مدير النادي",
+                "phone": "0000000000",
+                "national_id": "000000000000",
+                "address": "المدينة",
+                "photo_url": "",
+                "role": "admin",
+                "card_number": 0,
+                "registration_date": datetime.now().strftime("%Y-%m-%d")
+            }
+            users_col.insert_one(admin_user)
+            print("✅ تم إنشاء الأدمن الافتراضي")
+        else:
+            print("ℹ️ الأدمن موجود بالفعل")
+    except Exception:
+        traceback.print_exc()
 
 # =====================
 # Routes
 # =====================
-
 @app.route("/")
 def index():
-    return render_template("index.html", user=session.get("user"))
+    try:
+        players = list(players_col.find()) if "players" in db.list_collection_names() else []
+        ads = list(ads_col.find()) if "ads" in db.list_collection_names() else []
+    except Exception:
+        players, ads = [], []
+    return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
-
-# ---------------------
-# لوحة الأدمن
-# ---------------------
+# صفحة الأدمن (عرض كل المستخدمين والتذاكر)
 @app.route("/admin")
-def admin_dashboard():
+def admin():
     user_session = session.get("user")
-
     if not user_session or user_session.get("role") != "admin":
         flash("❌ لا تمتلك صلاحية الوصول")
         return redirect(url_for("login"))
+    try:
+        users = list(users_col.find())
+        tickets = list(tickets_col.find())
+    except Exception:
+        traceback.print_exc()
+        users, tickets = [], []
+    return render_template("admin.html", users=users, tickets=tickets, user=user_session)
 
-    users = list(users_col.find())
-    return render_template("admin.html", users=users, user=user_session)
-
-
-# ---------------------
-# صفحة المستخدم (user.html)
-# ---------------------
+# صفحة المستخدم (يعرض بيانات المستخدم المسجل)
 @app.route("/user")
-def user_dashboard():
+def user_page():
     user_session = session.get("user")
-
     if not user_session or user_session.get("role") != "user":
         flash("❌ يجب تسجيل الدخول كمستخدم")
         return redirect(url_for("login"))
 
-    user = users_col.find_one({"username": user_session["username"]})
+    username = user_session.get("username")
+    try:
+        user = users_col.find_one({"username": username})
+        if not user:
+            flash("❌ لم يتم العثور على المستخدم")
+            return redirect(url_for("login"))
 
-    if not user:
-        flash("❌ لم يتم العثور على المستخدم")
-        return redirect(url_for("login"))
+        # ضمان وجود رقم بطاقه
+        if not user.get("card_number"):
+            card_number = get_next_card_number()
+            users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
+            user["card_number"] = card_number
 
-    # تأكيد وجود رقم البطاقة
-    if not user.get("card_number"):
-        new_card = get_next_card_number()
-        users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": new_card}})
-        user["card_number"] = new_card
+        # ضمان وجود تاريخ تسجيل
+        if not user.get("registration_date"):
+            reg = datetime.now().strftime("%Y-%m-%d")
+            users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": reg}})
+            user["registration_date"] = reg
 
-    # تاريخ التسجيل
-    if "registration_date" in user:
+        # تجهيز التواريخ
         try:
             reg_date = datetime.strptime(user["registration_date"], "%Y-%m-%d")
-        except:
+        except Exception:
             reg_date = datetime.now()
-    else:
-        reg_date = datetime.now()
-        users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": reg_date.strftime("%Y-%m-%d")}})
+        expiry = reg_date + timedelta(days=180)
 
-    # الصلاحية 6 أشهر
-    expiry = reg_date + timedelta(days=180)
+        # QR data-uri (يوجه لعرض البطاقة عبر رابط)
+        qr_uri = generate_qr_data_uri(f"{request.host_url}user_card/{user['card_number']}")
 
-    # توليد QR
-    qr_data = f"{request.host_url}user_card/{user['card_number']}"
-    qr_image = generate_qr(qr_data)
+        return render_template(
+            "user.html",
+            user=user,
+            registration_date=reg_date.strftime("%d/%m/%Y"),
+            expiry_date=expiry.strftime("%d/%m/%Y"),
+            qr_code=qr_uri
+        )
+    except Exception:
+        traceback.print_exc()
+        flash("❌ حدث خطأ أثناء جلب بيانات المستخدم")
+        return redirect(url_for("index"))
 
-    return render_template(
-        "user.html",
-        user=user,
-        registration_date=reg_date.strftime("%d/%m/%Y"),
-        expiry_date=expiry.strftime("%d/%m/%Y"),
-        qr_code=qr_image
-    )
-
-
-# ---------------------
-# عرض بطاقة المستخدم عند مسح QR
-# ---------------------
+# عرض البطاقة عبر رابط (بعد مسح QR)
 @app.route("/user_card/<int:card_number>")
 def user_card(card_number):
-    user = users_col.find_one({"card_number": card_number})
-    if not user:
-        return "❌ البطاقة غير موجودة"
+    try:
+        user = users_col.find_one({"card_number": card_number})
+        if not user:
+            return "❌ البطاقة غير موجودة"
+        return render_template("user_card.html", user=user)
+    except Exception:
+        traceback.print_exc()
+        return "❌ خطأ داخلي"
 
-    return render_template("user_card.html", user=user)
-
-
-# ---------------------
 # تسجيل الدخول
-# ---------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = (request.form.get("username") or "").strip()
+        password = request.form.get("password") or ""
 
-        # الأدمن
+        # تحقق الأدمن الثابت
         if username == "admin" and password == "22@22":
             session["user"] = {"username": "admin", "role": "admin"}
-            return redirect(url_for("admin_dashboard"))
+            return redirect(url_for("admin"))
 
-        # المستخدم العادي
-        user = users_col.find_one({"username": username, "password": password})
+        # تحقق المستخدم من قاعدة البيانات
+        try:
+            user = users_col.find_one({"username": username, "password": password})
+        except Exception:
+            traceback.print_exc()
+            user = None
+
         if user:
-            session["user"] = {"username": user["username"], "role": "user"}
-            return redirect(url_for("user_dashboard"))
-
-        flash("❌ اسم المستخدم أو كلمة المرور خاطئة")
-
+            session["user"] = {"username": user["username"], "role": user.get("role", "user")}
+            return redirect(url_for("user_page"))
+        else:
+            flash("❌ اسم المستخدم أو كلمة المرور خاطئة")
     return render_template("login.html")
 
-
-# ---------------------
-# التسجيل
-# ---------------------
+# تسجيل مستخدم جديد (يدعم رفع صورة عبر حقل input name="photo")
 @app.route("/register", methods=["GET", "POST"])
 def register():
-
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
-        full_name = request.form["full_name"]
-        phone = request.form["phone"]
-        national_id = request.form["national_id"]
-        address = request.form["address"]
-        photo_url = request.form["photo_url"]
+        try:
+            username = (request.form.get("username") or "").strip()
+            password = request.form.get("password") or ""
+            full_name = request.form.get("full_name") or ""
+            phone = request.form.get("phone") or ""
+            address = request.form.get("address") or ""
+            national_id = request.form.get("national_id") or ""
 
-        if users_col.find_one({"username": username}):
-            flash("❌ اسم المستخدم موجود بالفعل")
+            # صورة: نسمح بالرفع حقل name="photo"
+            photo_file = request.files.get("photo")
+            photo_url = ""
+            if photo_file and allowed_file(photo_file.filename):
+                photo_url = save_photo(photo_file)
+            else:
+                # إن لم تقم برفع صورة قد يرسل العميل رابط في حقل "photo_url"
+                photo_url = request.form.get("photo_url") or ""
+
+            if users_col.find_one({"username": username}):
+                flash("❌ اسم المستخدم موجود بالفعل")
+                return redirect(url_for("register"))
+
+            new_user = {
+                "username": username,
+                "password": password,
+                "full_name": full_name,
+                "phone": phone,
+                "address": address,
+                "national_id": national_id,
+                "photo_url": photo_url,
+                "role": "user",
+                "card_number": get_next_card_number(),
+                "registration_date": datetime.now().strftime("%Y-%m-%d")
+            }
+            users_col.insert_one(new_user)
+            flash("✅ تم إنشاء الحساب بنجاح")
+            return redirect(url_for("login"))
+        except Exception:
+            traceback.print_exc()
+            flash("❌ حدث خطأ أثناء التسجيل")
             return redirect(url_for("register"))
-
-        new_user = {
-            "username": username,
-            "password": password,
-            "full_name": full_name,
-            "phone": phone,
-            "national_id": national_id,
-            "address": address,
-            "photo_url": photo_url,
-            "role": "user",
-            "card_number": get_next_card_number(),
-            "registration_date": datetime.now().strftime("%Y-%m-%d")
-        }
-
-        users_col.insert_one(new_user)
-        flash("✅ تم إنشاء الحساب بنجاح")
-        return redirect(url_for("login"))
-
     return render_template("register.html")
 
-
-# ---------------------
 # تسجيل الخروج
-# ---------------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)
-    flash("تم تسجيل الخروج")
+    flash("✅ تم تسجيل الخروج")
     return redirect(url_for("index"))
 
-
 # =====================
-# تشغيل السيرفر
+# بدء السيرفر
 # =====================
 if __name__ == "__main__":
     ensure_admin()
