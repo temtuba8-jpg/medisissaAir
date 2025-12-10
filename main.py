@@ -126,8 +126,8 @@ def admin_dashboard():
 # ---------------------
 @app.route("/user")
 def user_dashboard():
-    if "user" not in session or session["user"]["role"] != "user":
-        flash("❌ يجب تسجيل الدخول كمستخدم للوصول لهذه الصفحة")
+    if "user" not in session or session["user"]["role"] not in ["user", "admin"]:
+        flash("❌ يجب تسجيل الدخول للوصول لهذه الصفحة")
         return redirect(url_for("login"))
 
     username = session["user"]["username"]
@@ -191,11 +191,13 @@ def login():
         username = request.form.get("username")
         password = request.form.get("password")
 
+        # تحقق من الأدمن أولاً
         if username == "admin" and password == "22@22":
             session["user"] = {"username": "admin", "role": "admin"}
             flash("✅ تم تسجيل الدخول كأدمن")
             return redirect(url_for("admin_dashboard"))
 
+        # تحقق من المستخدم العادي
         user = users_col.find_one({"username": username, "password": password})
         if user:
             session["user"] = {"username": user["username"], "role": "user"}
