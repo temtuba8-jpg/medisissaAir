@@ -39,7 +39,7 @@ except Exception as e:
 # Helpers
 # =====================
 def generate_qr(data):
-    qr = qrcode.QRCode(box_size=8, border=2)
+    qr = qrcode.QRCode(box_size=6, border=2)
     qr.add_data(data)
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
@@ -61,13 +61,13 @@ def get_next_card_number():
     return 1
 
 # =====================
-# إنشاء حساب أدمن افتراضي (إذا لم يكن موجود)
+# إنشاء حساب أدمن افتراضي
 # =====================
 def ensure_admin():
     if users_col.count_documents({"username": "admin"}) == 0:
         admin_user = {
             "username": "admin",
-            "password": "22@22",  
+            "password": "22@22",
             "full_name": "مدير النادي",
             "phone": "0000000000",
             "national_id": "000000000000",
@@ -89,22 +89,24 @@ def index():
     ads = find("ads")
     return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
+# لوحة تحكم الأدمن
 @app.route("/admin")
 def admin_dashboard():
     if "user" not in session or session["user"]["role"] != "admin":
         flash("❌ لا تمتلك صلاحية الوصول لهذه الصفحة")
         return redirect(url_for("login"))
+
     users = find("users")
     tickets = find("tickets")
     return render_template("admin.html", users=users, tickets=tickets, user=session.get("user"))
 
+# صفحة المستخدم
 @app.route("/user")
 def user_dashboard():
     if "user" not in session or session["user"]["role"] != "user":
         flash("❌ يجب تسجيل الدخول كمستخدم للوصول لهذه الصفحة")
         return redirect(url_for("login"))
 
-    # جلب بيانات المستخدم من قاعدة البيانات
     username = session["user"]["username"]
     user = users_col.find_one({"username": username})
 
@@ -112,33 +114,46 @@ def user_dashboard():
         flash("❌ خطأ في جلب بيانات المستخدم")
         return redirect(url_for("login"))
 
-    # توليد رقم عضوية إذا لم يكن موجود
+    # توليد رقم العضوية إذا لم يكن موجود
     if "card_number" not in user:
         card_number = get_next_card_number()
         users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
         user["card_number"] = card_number
 
     # حساب تاريخ التسجيل وصلاحية البطاقة
-    registration_date = user.get("registration_date", datetime.now())
-    if isinstance(registration_date, str):
-        registration_date = datetime.strptime(registration_date, "%Y-%m-%d")
-    expiry_date = registration_date + timedelta(days=180)
-
-    # حفظ تاريخ التسجيل إذا لم يكن موجود
-    if "registration_date" not in user:
+    registration_date_str = user.get("registration_date")
+    if registration_date_str:
+        try:
+            registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
+        except:
+            registration_date = datetime.now()
+    else:
+        registration_date = datetime.now()
         users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
+
+    expiry_date = registration_date + timedelta(days=180)
 
     # توليد باركود QR يحتوي على رابط البطاقة
     qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
 
+    safe_user = {
+        "full_name": user.get("full_name", ""),
+        "card_number": user.get("card_number", ""),
+        "phone": user.get("phone", ""),
+        "address": user.get("address", ""),
+        "national_id": user.get("national_id", ""),
+        "photo_url": user.get("photo_url", "")
+    }
+
     return render_template(
         "user.html",
-        user=user,
+        user=safe_user,
         registration_date=registration_date.strftime("%d/%m/%Y"),
         expiry_date=expiry_date.strftime("%d/%m/%Y"),
         qr_code=qr_code
     )
 
+# تسجيل الدخول
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -161,6 +176,7 @@ def login():
 
     return render_template("login.html")
 
+# تسجيل مستخدم جديد
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -198,6 +214,7 @@ def register():
 
     return render_template("register.html")
 
+# تسجيل الخروج
 @app.route("/logout")
 def logout():
     session.pop("user", None)
@@ -205,7 +222,7 @@ def logout():
     return redirect(url_for("index"))
 
 # =====================
-# Run Server
+# تشغيل السيرفر
 # =====================
 if __name__ == "__main__":
     ensure_admin()
