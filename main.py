@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from pymongo import MongoClient
 from urllib.parse import quote_plus
 import qrcode
@@ -18,7 +18,6 @@ password_escaped = quote_plus(password)
 cluster = "cluster1.6wgwgl5.mongodb.net"
 database_name = "sahoor"
 
-# URI بدون مكتبة bson إضافية
 uri = f"mongodb+srv://{username}:{password_escaped}@{cluster}/{database_name}?retryWrites=true&w=majority"
 
 try:
@@ -28,10 +27,10 @@ try:
     tickets_col = db.tickets
     players_col = db.players
     ads_col = db.ads
-    client.server_info()  # التحقق من الاتصال
+    client.server_info()  # التأكد من الاتصال
     print("✅ تم الاتصال بقاعدة البيانات بنجاح")
 except Exception as e:
-    print("⚠️ لم يتم الاتصال بقاعدة البيانات، تحقق من MongoDB Atlas و IP Whitelist")
+    print("⚠️ لم يتم الاتصال بقاعدة البيانات")
     print("Error:", e)
     sys.exit(1)
 
@@ -47,14 +46,11 @@ def generate_qr(data):
     img.save(buffer, format="PNG")
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-
 def find(collection, query={}):
     return list(db[collection].find(query))
 
-
 def insert_one(collection, document):
     return db[collection].insert_one(document)
-
 
 def get_next_ticket_number():
     tickets = list(tickets_col.find())
@@ -90,15 +86,16 @@ def ensure_admin():
 def index():
     players = find("players")
     ads = find("ads")
-    return render_template("index.html", players=players, ads=ads)
+    return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
 @app.route("/admin")
 def admin_dashboard():
     if "user" not in session or session["user"]["role"] != "admin":
+        flash("❌ لا تمتلك صلاحية الوصول لهذه الصفحة")
         return redirect(url_for("login"))
     users = find("users")
     tickets = find("tickets")
-    return render_template("admin_dashboard.html", users=users, tickets=tickets)
+    return render_template("admin_dashboard.html", users=users, tickets=tickets, user=session.get("user"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -111,19 +108,48 @@ def login():
                 "username": user["username"],
                 "role": user.get("role", "user")
             }
-            return redirect(url_for("admin_dashboard") if user.get("role") == "admin" else url_for("index"))
+            flash(f"✅ تم تسجيل الدخول بنجاح كـ {user['username']}")
+            if user.get("role") == "admin":
+                return redirect(url_for("admin_dashboard"))
+            else:
+                return redirect(url_for("index"))
         else:
-            return "اسم المستخدم أو كلمة المرور خاطئة"
-    return render_template("login.html")
+            flash("❌ اسم المستخدم أو كلمة المرور خاطئة")
+            return redirect(url_for("login"))
+    return render_template("login.html", user=session.get("user"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        username = request.form["username"]
+        password = request.form["password"]
+        full_name = request.form.get("full_name", "")
+        phone = request.form.get("phone", "")
+        if users_col.find_one({"username": username}):
+            flash("❌ اسم المستخدم موجود بالفعل")
+            return redirect(url_for("register"))
+        new_user = {
+            "username": username,
+            "password": password,
+            "full_name": full_name,
+            "phone": phone,
+            "role": "user"
+        }
+        users_col.insert_one(new_user)
+        flash(f"✅ تم إنشاء الحساب بنجاح: {username}")
+        return redirect(url_for("login"))
+    return render_template("register.html", user=session.get("user"))
 
 @app.route("/logout")
 def logout():
     session.pop("user", None)
+    flash("✅ تم تسجيل الخروج")
     return redirect(url_for("index"))
 
 @app.route("/tickets/new", methods=["POST"])
 def new_ticket():
     if "user" not in session:
+        flash("❌ يجب تسجيل الدخول لإنشاء تذكرة")
         return redirect(url_for("login"))
     ticket_number = get_next_ticket_number()
     ticket_data = {
@@ -132,7 +158,7 @@ def new_ticket():
     }
     insert_one("tickets", ticket_data)
     qr_code = generate_qr(str(ticket_number))
-    return render_template("ticket.html", ticket=ticket_data, qr_code=qr_code)
+    return render_template("ticket.html", ticket=ticket_data, qr_code=qr_code, user=session.get("user"))
 
 # =====================
 # Run Server
