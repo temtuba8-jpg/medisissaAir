@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = "secretkey123"
 
 # =====================
-# إعداد اتصال MongoDB
+# إعداد اتصال MongoDB Atlas
 # =====================
 username = "sahoor"
 password = "Fad@0911923356"
@@ -89,33 +89,41 @@ def index():
     ads = find("ads")
     return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
+# ---------------------
 # لوحة تحكم الأدمن
+# ---------------------
 @app.route("/admin")
 def admin_dashboard():
     if "user" not in session or session["user"]["role"] != "admin":
         flash("❌ لا تمتلك صلاحية الوصول لهذه الصفحة")
         return redirect(url_for("login"))
 
-    users = find("users")
-    tickets = find("tickets")
+    try:
+        users = find("users")
+        tickets = find("tickets")
+        # معالجة البيانات بشكل آمن
+        safe_users = []
+        for u in users:
+            safe_users.append({
+                "username": u.get("username", ""),
+                "full_name": u.get("full_name", ""),
+                "phone": u.get("phone", ""),
+                "address": u.get("address", ""),
+                "national_id": u.get("national_id", ""),
+                "photo_url": u.get("photo_url", ""),
+                "card_number": u.get("card_number", ""),
+                "registration_date": u.get("registration_date", ""),
+                "role": u.get("role", "user")
+            })
+        return render_template("admin.html", users=safe_users, tickets=tickets, user=session.get("user"))
+    except Exception as e:
+        print("❌ خطأ في صفحة الأدمن:", e)
+        flash("❌ حدث خطأ أثناء عرض بيانات الأدمن")
+        return redirect(url_for("index"))
 
-    # التأكد من الحقول لكل مستخدم قبل العرض
-    safe_users = []
-    for u in users:
-        safe_users.append({
-            "username": u.get("username", ""),
-            "full_name": u.get("full_name", ""),
-            "phone": u.get("phone", ""),
-            "address": u.get("address", ""),
-            "national_id": u.get("national_id", ""),
-            "photo_url": u.get("photo_url", ""),
-            "card_number": u.get("card_number", ""),
-            "role": u.get("role", "user")
-        })
-
-    return render_template("admin.html", users=safe_users, tickets=tickets, user=session.get("user"))
-
+# ---------------------
 # صفحة المستخدم
+# ---------------------
 @app.route("/user")
 def user_dashboard():
     if "user" not in session or session["user"]["role"] != "user":
@@ -123,51 +131,60 @@ def user_dashboard():
         return redirect(url_for("login"))
 
     username = session["user"]["username"]
-    user = users_col.find_one({"username": username})
+    try:
+        user = users_col.find_one({"username": username})
+        if not user:
+            flash("❌ خطأ في جلب بيانات المستخدم")
+            return redirect(url_for("login"))
 
-    if not user:
-        flash("❌ خطأ في جلب بيانات المستخدم")
-        return redirect(url_for("login"))
+        # توليد رقم العضوية إذا لم يكن موجود
+        if "card_number" not in user:
+            card_number = get_next_card_number()
+            users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
+            user["card_number"] = card_number
 
-    # توليد رقم العضوية إذا لم يكن موجود
-    if "card_number" not in user:
-        card_number = get_next_card_number()
-        users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
-        user["card_number"] = card_number
-
-    # حساب تاريخ التسجيل وصلاحية البطاقة
-    registration_date_str = user.get("registration_date")
-    if registration_date_str:
-        try:
-            registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
-        except:
+        # حساب تاريخ التسجيل وصلاحية البطاقة
+        registration_date_str = user.get("registration_date")
+        if registration_date_str:
+            try:
+                registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
+            except:
+                registration_date = datetime.now()
+        else:
             registration_date = datetime.now()
-    else:
-        registration_date = datetime.now()
-        users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
+            users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
 
-    expiry_date = registration_date + timedelta(days=180)
+        expiry_date = registration_date + timedelta(days=180)
 
-    qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
+        # توليد QR Code
+        qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
 
-    safe_user = {
-        "full_name": user.get("full_name", ""),
-        "card_number": user.get("card_number", ""),
-        "phone": user.get("phone", ""),
-        "address": user.get("address", ""),
-        "national_id": user.get("national_id", ""),
-        "photo_url": user.get("photo_url", "")
-    }
+        # بيانات المستخدم بشكل آمن
+        safe_user = {
+            "full_name": user.get("full_name", ""),
+            "card_number": user.get("card_number", ""),
+            "phone": user.get("phone", ""),
+            "address": user.get("address", ""),
+            "national_id": user.get("national_id", ""),
+            "photo_url": user.get("photo_url", "")
+        }
 
-    return render_template(
-        "user.html",
-        user=safe_user,
-        registration_date=registration_date.strftime("%d/%m/%Y"),
-        expiry_date=expiry_date.strftime("%d/%m/%Y"),
-        qr_code=qr_code
-    )
+        return render_template(
+            "user.html",
+            user=safe_user,
+            registration_date=registration_date.strftime("%d/%m/%Y"),
+            expiry_date=expiry_date.strftime("%d/%m/%Y"),
+            qr_code=qr_code
+        )
 
+    except Exception as e:
+        print("❌ خطأ في صفحة المستخدم:", e)
+        flash("❌ حدث خطأ أثناء عرض بياناتك")
+        return redirect(url_for("index"))
+
+# ---------------------
 # تسجيل الدخول
+# ---------------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -190,7 +207,9 @@ def login():
 
     return render_template("login.html")
 
+# ---------------------
 # تسجيل مستخدم جديد
+# ---------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -228,7 +247,9 @@ def register():
 
     return render_template("register.html")
 
+# ---------------------
 # تسجيل الخروج
+# ---------------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)
