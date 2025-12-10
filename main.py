@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.secret_key = "secretkey123"
 
 # =====================
-# إعداد اتصال MongoDB Atlas
+# إعداد اتصال MongoDB
 # =====================
 username = "sahoor"
 password = "Fad@0911923356"
@@ -48,10 +48,10 @@ def generate_qr(data):
     return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 def find(collection, query={}):
-    return list(db[collection].find(query))
-
-def insert_one(collection, document):
-    return db[collection].insert_one(document)
+    try:
+        return list(db[collection].find(query))
+    except:
+        return []
 
 def get_next_card_number():
     users = list(users_col.find())
@@ -98,7 +98,22 @@ def admin_dashboard():
 
     users = find("users")
     tickets = find("tickets")
-    return render_template("admin.html", users=users, tickets=tickets, user=session.get("user"))
+
+    # التأكد من الحقول لكل مستخدم قبل العرض
+    safe_users = []
+    for u in users:
+        safe_users.append({
+            "username": u.get("username", ""),
+            "full_name": u.get("full_name", ""),
+            "phone": u.get("phone", ""),
+            "address": u.get("address", ""),
+            "national_id": u.get("national_id", ""),
+            "photo_url": u.get("photo_url", ""),
+            "card_number": u.get("card_number", ""),
+            "role": u.get("role", "user")
+        })
+
+    return render_template("admin.html", users=safe_users, tickets=tickets, user=session.get("user"))
 
 # صفحة المستخدم
 @app.route("/user")
@@ -133,7 +148,6 @@ def user_dashboard():
 
     expiry_date = registration_date + timedelta(days=180)
 
-    # توليد باركود QR يحتوي على رابط البطاقة
     qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
 
     safe_user = {
@@ -226,5 +240,4 @@ def logout():
 # =====================
 if __name__ == "__main__":
     ensure_admin()
-    print("كل المستخدمين الحاليين:", find("users"))
     app.run(host="0.0.0.0", port=5000, debug=True)
