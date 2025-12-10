@@ -3,3 +3,6 @@ pymongo==4.7.1
 qrcode==7.4.2
 python-dotenv==1.1.1
 bson==0.5.10
+gunicorn
+
+
