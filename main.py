@@ -95,7 +95,14 @@ def admin_dashboard():
         return redirect(url_for("login"))
     users = find("users")
     tickets = find("tickets")
-    return render_template("admin_dashboard.html", users=users, tickets=tickets, user=session.get("user"))
+    return render_template("admin.html", users=users, tickets=tickets, user=session.get("user"))
+
+@app.route("/user")
+def user_dashboard():
+    if "user" not in session or session["user"]["role"] != "user":
+        flash("❌ يجب تسجيل الدخول كمستخدم للوصول لهذه الصفحة")
+        return redirect(url_for("login"))
+    return render_template("user.html", user=session.get("user"))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -112,7 +119,7 @@ def login():
             if user.get("role") == "admin":
                 return redirect(url_for("admin_dashboard"))
             else:
-                return redirect(url_for("index"))
+                return redirect(url_for("user_dashboard"))
         else:
             flash("❌ اسم المستخدم أو كلمة المرور خاطئة")
             return redirect(url_for("login"))
