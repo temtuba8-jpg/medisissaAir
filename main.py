@@ -94,93 +94,79 @@ def index():
 # ---------------------
 @app.route("/admin")
 def admin_dashboard():
-    if "user" not in session or session["user"]["role"] != "admin":
+    user_session = session.get("user")
+    if not user_session or user_session.get("role") != "admin":
         flash("❌ لا تمتلك صلاحية الوصول لهذه الصفحة")
         return redirect(url_for("login"))
 
-    try:
-        users = find("users")
-        tickets = find("tickets")
-        # معالجة البيانات بشكل آمن
-        safe_users = []
-        for u in users:
-            safe_users.append({
-                "username": u.get("username", ""),
-                "full_name": u.get("full_name", ""),
-                "phone": u.get("phone", ""),
-                "address": u.get("address", ""),
-                "national_id": u.get("national_id", ""),
-                "photo_url": u.get("photo_url", ""),
-                "card_number": u.get("card_number", ""),
-                "registration_date": u.get("registration_date", ""),
-                "role": u.get("role", "user")
-            })
-        return render_template("admin.html", users=safe_users, tickets=tickets, user=session.get("user"))
-    except Exception as e:
-        print("❌ خطأ في صفحة الأدمن:", e)
-        flash("❌ حدث خطأ أثناء عرض بيانات الأدمن")
-        return redirect(url_for("index"))
+    users = find("users")
+    tickets = find("tickets")
+    safe_users = []
+    for u in users:
+        safe_users.append({
+            "username": u.get("username", ""),
+            "full_name": u.get("full_name", ""),
+            "phone": u.get("phone", ""),
+            "address": u.get("address", ""),
+            "national_id": u.get("national_id", ""),
+            "photo_url": u.get("photo_url", ""),
+            "card_number": u.get("card_number", ""),
+            "registration_date": u.get("registration_date", ""),
+            "role": u.get("role", "user")
+        })
+    return render_template("admin.html", users=safe_users, tickets=tickets, user=user_session)
 
 # ---------------------
-# صفحة المستخدم
+# صفحة المستخدم العادي
 # ---------------------
 @app.route("/user")
 def user_dashboard():
-    if "user" not in session or session["user"]["role"] not in ["user", "admin"]:
-        flash("❌ يجب تسجيل الدخول للوصول لهذه الصفحة")
+    user_session = session.get("user")
+    if not user_session or user_session.get("role") != "user":
+        flash("❌ يجب تسجيل الدخول كمستخدم للوصول لهذه الصفحة")
         return redirect(url_for("login"))
 
-    username = session["user"]["username"]
-    try:
-        user = users_col.find_one({"username": username})
-        if not user:
-            flash("❌ خطأ في جلب بيانات المستخدم")
-            return redirect(url_for("login"))
+    username = user_session.get("username")
+    user = users_col.find_one({"username": username})
+    if not user:
+        flash("❌ خطأ في جلب بيانات المستخدم")
+        return redirect(url_for("login"))
 
-        # توليد رقم العضوية إذا لم يكن موجود
-        if "card_number" not in user:
-            card_number = get_next_card_number()
-            users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
-            user["card_number"] = card_number
+    # توليد رقم العضوية إذا لم يكن موجود
+    if "card_number" not in user:
+        card_number = get_next_card_number()
+        users_col.update_one({"_id": user["_id"]}, {"$set": {"card_number": card_number}})
+        user["card_number"] = card_number
 
-        # حساب تاريخ التسجيل وصلاحية البطاقة
-        registration_date_str = user.get("registration_date")
-        if registration_date_str:
-            try:
-                registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
-            except:
-                registration_date = datetime.now()
-        else:
+    registration_date_str = user.get("registration_date")
+    if registration_date_str:
+        try:
+            registration_date = datetime.strptime(registration_date_str, "%Y-%m-%d")
+        except:
             registration_date = datetime.now()
-            users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
+    else:
+        registration_date = datetime.now()
+        users_col.update_one({"_id": user["_id"]}, {"$set": {"registration_date": registration_date.strftime("%Y-%m-%d")}})
 
-        expiry_date = registration_date + timedelta(days=180)
+    expiry_date = registration_date + timedelta(days=180)
+    qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
 
-        # توليد QR Code
-        qr_code = generate_qr(f"{request.host_url}user_card/{user['card_number']}")
+    safe_user = {
+        "full_name": user.get("full_name", ""),
+        "card_number": user.get("card_number", ""),
+        "phone": user.get("phone", ""),
+        "address": user.get("address", ""),
+        "national_id": user.get("national_id", ""),
+        "photo_url": user.get("photo_url", "")
+    }
 
-        # بيانات المستخدم بشكل آمن
-        safe_user = {
-            "full_name": user.get("full_name", ""),
-            "card_number": user.get("card_number", ""),
-            "phone": user.get("phone", ""),
-            "address": user.get("address", ""),
-            "national_id": user.get("national_id", ""),
-            "photo_url": user.get("photo_url", "")
-        }
-
-        return render_template(
-            "user.html",
-            user=safe_user,
-            registration_date=registration_date.strftime("%d/%m/%Y"),
-            expiry_date=expiry_date.strftime("%d/%m/%Y"),
-            qr_code=qr_code
-        )
-
-    except Exception as e:
-        print("❌ خطأ في صفحة المستخدم:", e)
-        flash("❌ حدث خطأ أثناء عرض بياناتك")
-        return redirect(url_for("index"))
+    return render_template(
+        "user.html",
+        user=safe_user,
+        registration_date=registration_date.strftime("%d/%m/%Y"),
+        expiry_date=expiry_date.strftime("%d/%m/%Y"),
+        qr_code=qr_code
+    )
 
 # ---------------------
 # تسجيل الدخول
