@@ -152,7 +152,7 @@ def user_page():
     reg_date = datetime.strptime(user["registration_date"], "%Y-%m-%d")
     expiry = reg_date + timedelta(days=180)
 
-    # QR لعرض البطاقة
+    # QR
     qr_url = f"{request.host_url}user_card/{user['card_number']}"
     qr_code = generate_qr_base64(qr_url)
 
@@ -164,7 +164,7 @@ def user_page():
         qr_code=qr_code
     )
 
-# ----------------- صفحة البطاقة بعد مسح QR -----------------
+# ----------------- صفحة البطاقة -----------------
 @app.route("/user_card/<int:card_number>")
 def user_card(card_number):
     user = users_col.find_one({"card_number": card_number})
@@ -188,7 +188,7 @@ def login():
         user = users_col.find_one({"username": username, "password": password})
         if user:
             session["user"] = {"username": username, "role": "user"}
-            return redirect(url_for("user_page"))
+            return redirect(url_for("index"))  # ← الآن يفتح الرئيسية
 
         flash("❌ خطأ في اسم المستخدم أو كلمة المرور")
     return render_template("login.html")
