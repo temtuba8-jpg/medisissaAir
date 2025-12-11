@@ -3,106 +3,261 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>بطاقة العضو - نادي مديسيسة</title>
+<title>نادي مديسيسة الرياضي</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
-body {
-    font-family:'Cairo',sans-serif;
-    background:#faf3e0;
-    margin:0;
-    padding:20px;
-    display:flex;
+body { 
+    font-family:'Cairo',sans-serif; 
+    background:#fff8f0; 
+    color:#330000; 
+    margin:0; 
+    padding:0; 
+}
+
+header, footer { 
+    background:#8B0000; 
+    color:gold; 
+    padding:15px; 
+    text-align:center; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+header img.logo {
+    width: 100px;
+    animation: heartbeat 1s infinite;
+}
+
+@keyframes heartbeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+nav a, .admin-btn { 
+    color:gold; 
+    text-decoration:none; 
+    font-weight:bold; 
+    padding:5px 10px;
+    border-radius:5px;
+    cursor:pointer;
+    transition: background 0.3s;
+}
+
+nav a:hover, .admin-btn:hover {
+    background:gold;
+    color:#8B0000;
+}
+
+/* المودال */
+.modal-bg {
+    display:none;
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
     justify-content:center;
     align-items:center;
-    min-height:100vh;
 }
 
-.card-container {
-    max-width:420px;
-    width:100%;
-}
-
-.user-card {
+.modal-box {
     background:white;
-    border:3px solid gold;
-    border-radius:15px;
     padding:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+    border-radius:10px;
+    width:300px;
     text-align:center;
-}
-
-.user-card img.profile {
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    object-fit:cover;
     border:3px solid gold;
-    margin-bottom:10px;
 }
 
-.user-card h2 {
-    margin:5px 0;
-    color:#b8860b;
-}
-
-.user-card p {
-    margin:4px 0;
-    font-size:1em;
-}
-
-.qr-box {
-    margin-top:15px;
-}
-
-.qr-box img {
-    width:140px;
-}
-
-.buttons {
-    text-align:center;
-    margin-top:15px;
+input {
+    width:90%;
+    padding:10px;
+    margin-top:10px;
+    border-radius:5px;
+    border:1px solid #ccc;
 }
 
 button {
-    background:gold;
-    border:none;
-    padding:10px 20px;
+    background:gold; 
+    border:none; 
+    padding:10px 20px; 
+    border-radius:5px; 
+    cursor:pointer; 
+    margin-top:10px; 
     font-weight:bold;
-    border-radius:6px;
-    cursor:pointer;
-    margin:5px;
+}
+
+.player-grid, .ad-grid { 
+    display:grid; 
+    gap:15px; 
+    padding:20px; 
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); 
+}
+
+.player-card, .ad-card { 
+    border:2px solid gold; 
+    border-radius:12px; 
+    padding:10px; 
+    text-align:center; 
+    background:#fffbe6; 
+    transition: transform 0.3s; 
+}
+
+.player-card:hover, .ad-card:hover { 
+    transform: scale(1.05); 
+}
+
+.player-card img, .ad-card img { 
+    width:100%; 
+    border-radius:10px; 
+    height: auto;
+}
+
+h2 { 
+    color:#8B0000; 
+    text-align:center; 
+    margin-top:20px; 
+}
+
+@media(max-width:900px) {
+    header img.logo { width: 80px; }
+    .player-grid, .ad-grid { grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); padding:15px; }
+}
+
+@media(max-width:600px) {
+    header img.logo { width: 60px; }
+    nav { flex-direction: column; gap: 10px; }
+    .player-grid, .ad-grid { grid-template-columns: 1fr; padding:10px; }
+    h2 { font-size: 1.3em; }
+}
+
+@media(max-width:400px) {
+    header img.logo { width: 50px; }
+    h1 { font-size: 1.2em; }
+    nav a { font-size: 0.9em; padding:5px 8px; }
 }
 </style>
 </head>
-
 <body>
-<div class="card-container">
-    <div class="user-card">
 
-        <!-- صورة العضو -->
-        <img class="profile" src="{{ user.photo_url }}" alt="صورة العضو">
+<header>
+    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="شعار النادي" class="logo">
+    <h1>نادي مديسيسة الرياضي</h1>
+    <nav>
+        <a href="{{ url_for('index') }}">الرئيسية</a>
+        <a href="{{ url_for('login') }}">تسجيل الدخول</a>
 
-        <h2>{{ user.full_name }}</h2>
+        <!-- زر الإدارة -->
+        <span class="admin-btn" onclick="openAdminModal()">الإدارة</span>
+    </nav>
+</header>
 
-        <p><strong>اسم المستخدم:</strong> {{ user.username }}</p>
-        <p><strong>رقم العضوية:</strong> {{ user.card_number }}</p>
-        <p><strong>العنوان:</strong> {{ user.address or 'غير محدد' }}</p>
-        <p><strong>رقم الهاتف:</strong> {{ user.phone or 'غير محدد' }}</p>
-        <p><strong>الرقم الوطني:</strong> {{ user.national_id or 'غير محدد' }}</p>
-        <p><strong>تاريخ التسجيل:</strong> {{ registration_date }}</p>
-        <p><strong>صلاحية البطاقة:</strong> {{ expiry_date }}</p>
-
-        <div class="qr-box">
-            <p>امسح الباركود لعرض البطاقة</p>
-            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-        </div>
-    </div>
-
-    <div class="buttons">
-        <a href="{{ url_for('index') }}"><button>العودة للرئيسية</button></a>
-        <a href="{{ url_for('logout') }}"><button>تسجيل الخروج</button></a>
+<!-- نافذة كلمة السر -->
+<div class="modal-bg" id="adminModal">
+    <div class="modal-box">
+        <h3>دخول الإدارة</h3>
+        <p id="alert" style="color:red; display:none;">كلمة المرور غير صحيحة!</p>
+        <input type="password" id="adminPass" placeholder="أدخل كلمة المرور">
+        <button onclick="checkAdmin()">دخول</button>
+        <button onclick="closeAdminModal()">إلغاء</button>
     </div>
 </div>
+
+<section>
+<h2>اللاعبين</h2>
+<div class="player-grid">
+    {% for p in players %}
+    <div class="player-card">
+        <img src="{{ p.photo_url }}" alt="{{ p.name }}">
+        <h3>{{ p.name }}</h3>
+        <p>{{ p.position }}</p>
+    </div>
+    {% endfor %}
+</div>
+</section>
+
+<section>
+<h2>الإعلانات</h2>
+<div class="ad-grid">
+    {% for a in ads %}
+    <div class="ad-card">
+        <img src="{{ a.photo_url }}" alt="{{ a.title }}">
+        <p>{{ a.title }}</p>
+    </div>
+    {% endfor %}
+</div>
+</section>
+
+<footer>
+<p>حقوق النشر © نادي مديسيسة الرياضي</p>
+</footer>
+
+<script>
+// فتح المودال
+function openAdminModal() {
+    document.getElementById("adminModal").style.display = "flex";
+}
+
+// إغلاق المودال
+function closeAdminModal() {
+    document.getElementById("adminModal").style.display = "none";
+}
+
+// التحقق من الحظر
+function isBlocked() {
+    let blockTime = localStorage.getItem("admin_block");
+    if (!blockTime) return false;
+
+    let now = Date.now();
+    if (now < blockTime) return true;
+
+    // انتهى الحظر
+    localStorage.removeItem("admin_block");
+    localStorage.removeItem("admin_attempts");
+    return false;
+}
+
+// فحص كلمة المرور
+function checkAdmin() {
+
+    if (isBlocked()) {
+        alert("محظور لمدة 10 دقائق بسبب المحاولات المتكررة!");
+        return;
+    }
+
+    let pass = document.getElementById("adminPass").value;
+    let correct = "22@22";
+
+    if (pass === correct) {
+        localStorage.removeItem("admin_attempts");
+        window.location.href = "/admin";
+    } else {
+        let attempts = Number(localStorage.getItem("admin_attempts") || 0);
+        attempts++;
+        localStorage.setItem("admin_attempts", attempts);
+
+        document.getElementById("alert").style.display = "block";
+
+        if (attempts >= 4) {
+            let blockUntil = Date.now() + (10 * 60 * 1000);
+            localStorage.setItem("admin_block", blockUntil);
+            alert("تم حظرك لمدة 10 دقائق بسبب كثرة المحاولات!");
+        }
+    }
+}
+</script>
+
 </body>
 </html>
