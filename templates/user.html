@@ -32,7 +32,7 @@ body {
     text-align:center;
 }
 
-.user-card img {
+.user-card img.profile {
     width:120px;
     height:120px;
     border-radius:50%;
@@ -79,8 +79,12 @@ button {
 <body>
 <div class="card-container">
     <div class="user-card">
-        <img src="{{ user.photo_url or 'https://via.placeholder.com/150' }}" alt="صورة العضو">
+
+        <!-- صورة العضو -->
+        <img class="profile" src="{{ user.photo_url }}" alt="صورة العضو">
+
         <h2>{{ user.full_name }}</h2>
+
         <p><strong>اسم المستخدم:</strong> {{ user.username }}</p>
         <p><strong>رقم العضوية:</strong> {{ user.card_number }}</p>
         <p><strong>العنوان:</strong> {{ user.address or 'غير محدد' }}</p>
