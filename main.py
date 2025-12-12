@@ -1,4 +1,3 @@
-# main.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from pymongo import MongoClient
 from urllib.parse import quote_plus
@@ -65,7 +64,8 @@ def generate_qr_base64(data):
         qr.make(fit=True)
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = io.BytesIO()
-        img.save(buffer, format="PNG")
+        # مع PyPNG، لا تستخدم format
+        img.save(buffer)
         b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
         return f"data:image/png;base64,{b64}"
     except Exception:
@@ -249,7 +249,6 @@ def login():
             traceback.print_exc()
             user = None
 
-        # تحقق من جميع المستخدمين بما فيهم الأدمن
         if user and user.get("password") == password:
             session.permanent = True
             role = user.get("role", "user")
