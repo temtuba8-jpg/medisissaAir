@@ -14,7 +14,7 @@ app.secret_key = "secretkey123"
 # تحسين إعدادات الجلسة
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = True  # لأن Render يستخدم HTTPS
+app.config['SESSION_COOKIE_SECURE'] = True  # Render يستخدم HTTPS
 app.permanent_session_lifetime = timedelta(days=1)
 
 # =====================
@@ -28,7 +28,6 @@ database_name = "sahoor"
 uri = f"mongodb+srv://{username}:{password_escaped}@{cluster}/{database_name}?retryWrites=true&w=majority"
 
 def get_db():
-    """دالة للحصول على اتصال MongoDB"""
     try:
         client = MongoClient(uri, serverSelectionTimeoutMS=10000)
         db = client[database_name]
@@ -223,6 +222,7 @@ def login():
         if user and user.get("password") == password:
             session.permanent = True
             role = user.get("role", "user")
+            # إصلاح: تأكد من كتابة الدور بشكل صحيح
             session["user"] = {"username": username, "role": role}
             flash(f"✅ تسجيل الدخول ناجح ({role})")
             if role == "admin":
@@ -257,10 +257,8 @@ def user_page():
         flash("❌ الحساب غير موجود")
         return redirect(url_for("login"))
 
-    # إنشاء QR للبطاقة
     qr_url = f"{request.host_url}user_card/{user['card_number']}"
     qr_code = generate_qr_base64(qr_url)
-
     expiry = datetime.strptime(user["registration_date"], "%Y-%m-%d") + timedelta(days=180)
 
     return render_template(
