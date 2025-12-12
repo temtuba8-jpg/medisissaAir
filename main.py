@@ -135,14 +135,17 @@ def index():
 # ----------------- صفحة الأدمن -----------------
 @app.route("/admin")
 def admin():
-    # لا يوجد فحص جلسة — الدخول فقط من كلمة المرور في index.html
     try:
-        users = list(users_col.find())
-        tickets = list(tickets_col.find())
-    except:
+        # إذا لم تكن المجموعات موجودة، استخدم قائمة فارغة
+        users = list(users_col.find()) if "users" in db.list_collection_names() else []
+        tickets = list(tickets_col.find()) if "tickets" in db.list_collection_names() else []
+    except Exception as e:
+        # طباعة الخطأ للdebug
+        print("❌ Error in /admin:", e)
         users, tickets = [], []
 
     return render_template("admin.html", users=users, tickets=tickets)
+
 
 
 # ----------------- صفحة اليوزر -----------------
@@ -318,4 +321,5 @@ def logout():
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
