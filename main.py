@@ -314,11 +314,23 @@ def logout():
 
 # =====================
 
+@app.route("/ticket/<user_id>")
+def ticket(user_id):
+    db = get_db()
+    users_col = db.users
+    user = users_col.find_one({"username": user_id})
+    if not user:
+        flash("المستخدم غير موجود")
+        return redirect(url_for("admin"))
+    
+    # هنا ضع منطق إنشاء البطاقة أو عرضها
+    return render_template("ticket.html", user=user)
 
 # تشغيل السيرفر
 # =====================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
