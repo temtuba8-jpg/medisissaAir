@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تعديل المستخدم</title>
+    <style>
+        body { font-family: 'Cairo', sans-serif; padding: 20px; }
+        input, button { padding: 10px; margin: 5px 0; width: 100%; }
+    </style>
+</head>
+<body>
+
+<h2>تعديل كلمة المرور للمستخدم: {{ user.username }}</h2>
+
+<form method="POST">
+    <label>كلمة المرور الجديدة:</label>
+    <input type="text" name="password" required>
+
+    <button type="submit">حفظ التعديلات</button>
+</form>
+
+<br>
+<a href="{{ url_for('admin') }}">⬅️ العودة للوحة التحكم</a>
+
+</body>
+</html>
