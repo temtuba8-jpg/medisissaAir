@@ -355,10 +355,39 @@ def add_player():
     return render_template("add_player.html")
 
 #==============
+@app.route("/add_ad", methods=["GET", "POST"])
+def add_ad():
+    if "is_admin" not in session:
+        flash("❌ يجب تسجيل الدخول كأدمن")
+        return redirect(url_for("index"))
+
+    db = get_db()
+    ads_col = db.ads
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+
+        if not title or not description:
+            flash("❌ الرجاء تعبئة جميع الحقول")
+            return redirect(url_for("add_ad"))
+
+        # إضافة الإعلان إلى قاعدة البيانات
+        ads_col.insert_one({
+            "title": title,
+            "description": description,
+            "date": datetime.now().strftime("%Y-%m-%d")
+        })
+        flash("✅ تم إضافة الإعلان بنجاح")
+        return redirect(url_for("admin"))
+
+    return render_template("add_ad.html")
+#===========================
 # تشغيل السيرفر
 # =====================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
