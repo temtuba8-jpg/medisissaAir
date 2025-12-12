@@ -168,9 +168,13 @@ h2 {
 <div class="modal-bg" id="adminModal">
     <div class="modal-box">
         <h3>دخول الإدارة</h3>
-        <p id="alert" style="color:red; display:none;">كلمة المرور غير صحيحة!</p>
-        <input type="password" id="adminPass" placeholder="أدخل كلمة المرور">
-        <button onclick="checkAdmin()">دخول</button>
+
+        <!-- form يرسل كلمة السر إلى Flask -->
+        <form id="adminForm" method="POST" action="/admin_verify">
+            <input type="password" name="password" id="adminPass" placeholder="أدخل كلمة المرور">
+            <button type="submit">دخول</button>
+        </form>
+
         <button onclick="closeAdminModal()">إلغاء</button>
     </div>
 </div>
@@ -213,49 +217,6 @@ function openAdminModal() {
 // إغلاق المودال
 function closeAdminModal() {
     document.getElementById("adminModal").style.display = "none";
-}
-
-// التحقق من الحظر
-function isBlocked() {
-    let blockTime = localStorage.getItem("admin_block");
-    if (!blockTime) return false;
-
-    let now = Date.now();
-    if (now < blockTime) return true;
-
-    // انتهى الحظر
-    localStorage.removeItem("admin_block");
-    localStorage.removeItem("admin_attempts");
-    return false;
-}
-
-// فحص كلمة المرور
-function checkAdmin() {
-
-    if (isBlocked()) {
-        alert("محظور لمدة 10 دقائق بسبب المحاولات المتكررة!");
-        return;
-    }
-
-    let pass = document.getElementById("adminPass").value;
-    let correct = "22@22";
-
-    if (pass === correct) {
-        localStorage.removeItem("admin_attempts");
-        window.location.href = "/admin";
-    } else {
-        let attempts = Number(localStorage.getItem("admin_attempts") || 0);
-        attempts++;
-        localStorage.setItem("admin_attempts", attempts);
-
-        document.getElementById("alert").style.display = "block";
-
-        if (attempts >= 4) {
-            let blockUntil = Date.now() + (10 * 60 * 1000);
-            localStorage.setItem("admin_block", blockUntil);
-            alert("تم حظرك لمدة 10 دقائق بسبب كثرة المحاولات!");
-        }
-    }
 }
 </script>
 
