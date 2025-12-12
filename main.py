@@ -141,6 +141,28 @@ def logout_admin():
     return redirect(url_for("index"))
 
 # =====================
+@app.route("/edit_user/<username>", methods=["GET", "POST"])
+def edit_user(username):
+    if "is_admin" not in session:
+        return redirect(url_for("index"))
+
+    user = users_collection.find_one({"username": username})
+
+    if not user:
+        flash("المستخدم غير موجود")
+        return redirect(url_for("admin"))
+
+    if request.method == "POST":
+        new_password = request.form.get("new_password", "")
+        users_collection.update_one(
+            {"username": username},
+            {"$set": {"password": new_password}}
+        )
+        flash("تم تحديث كلمة المرور بنجاح")
+        return redirect(url_for("admin"))
+
+    return render_template("edit_user.html", user=user)
+
 # المستخدمين العاديين
 # =====================
 @app.route("/register", methods=["GET", "POST"])
@@ -279,3 +301,4 @@ def logout():
 # =====================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
