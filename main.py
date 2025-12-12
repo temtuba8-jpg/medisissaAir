@@ -1,4 +1,4 @@
-# main.py# main.py
+# main.py
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from pymongo import MongoClient
 from urllib.parse import quote_plus
@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
-# تحسين إعدادات الجلسة (اختياري لكن مفيد للاستقرار)
+# تحسين إعدادات الجلسة
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.permanent_session_lifetime = timedelta(days=1)
@@ -50,7 +50,6 @@ def allowed_file(filename):
     return ext in {"png", "jpg", "jpeg", "gif"}
 
 def save_photo_to_db(photo_file):
-    """تحويل الصورة إلى Base64 وتخزينها داخل MongoDB"""
     try:
         data = photo_file.read()
         b64 = base64.b64encode(data).decode("utf-8")
@@ -60,7 +59,6 @@ def save_photo_to_db(photo_file):
         return ""
 
 def generate_qr_base64(data):
-    """إنشاء QR كـ Base64 جاهز للعرض"""
     try:
         qr = qrcode.QRCode(box_size=6, border=2)
         qr.add_data(data)
@@ -114,7 +112,6 @@ def ensure_admin():
 # =====================
 @app.route("/")
 def index():
-    # لا نسمح لأي خطأ في جلب البيانات أن يكسر الصفحة
     try:
         players = list(players_col.find()) if "players" in db.list_collection_names() else []
     except Exception:
@@ -127,16 +124,17 @@ def index():
         traceback.print_exc()
         ads = []
 
-    # طباعة بسيطة للـ session للتصحيح
-    print("DEBUG: session at index ->", session.get("user"))
-
     return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
 # ----------------- صفحة الأدمن -----------------
-@@app.route("/admin")
+@app.route("/admin")
 def admin():
+    user_session = session.get("user")
+    if not user_session or user_session.get("role") != "admin":
+        flash("❌ لا تمتلك صلاحية الدخول")
+        return redirect(url_for("login"))
+
     try:
-        # إذا لم تكن المجموعات موجودة استخدم قائمة فارغة
         users = list(users_col.find()) if "users" in db.list_collection_names() else []
         players = list(players_col.find()) if "players" in db.list_collection_names() else []
         ads = list(ads_col.find()) if "ads" in db.list_collection_names() else []
@@ -145,13 +143,15 @@ def admin():
         users, players, ads = [], [], []
 
     return render_template("admin.html", users=users, players=players, ads=ads)
-#_______
+
+# ----------------- حذف مستخدم -----------------
 @app.route("/delete_user/<username>")
 def delete_user(username):
     users_col.delete_one({"username": username})
     flash("✅ تم حذف المستخدم")
     return redirect(url_for("admin"))
-####________
+
+# ----------------- إضافة إعلان -----------------
 @app.route("/add_ad", methods=["GET","POST"])
 def add_ad():
     if request.method == "POST":
@@ -162,9 +162,6 @@ def add_ad():
         flash("✅ تم إضافة الإعلان")
         return redirect(url_for("admin"))
     return render_template("add_ad.html")
-
-
-
 
 # ----------------- صفحة اليوزر -----------------
 @app.route("/user")
@@ -190,7 +187,6 @@ def user_page():
         flash("❌ الحساب غير موجود")
         return redirect(url_for("login"))
 
-    # رقم البطاقة
     if not user.get("card_number"):
         user["card_number"] = get_next_card_number()
         try:
@@ -198,7 +194,6 @@ def user_page():
         except Exception:
             traceback.print_exc()
 
-    # تاريخ التسجيل
     if not user.get("registration_date"):
         today = datetime.now().strftime("%Y-%m-%d")
         user["registration_date"] = today
@@ -213,7 +208,6 @@ def user_page():
         reg_date = datetime.now()
     expiry = reg_date + timedelta(days=180)
 
-    # QR
     qr_url = f"{request.host_url}user_card/{user['card_number']}"
     qr_code = generate_qr_base64(qr_url)
 
@@ -242,24 +236,19 @@ def user_card(card_number):
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        # جلب البيانات وإزالة المسافات
         username = (request.form.get("username") or "").strip()
         password = (request.form.get("password") or "").strip()
 
-        # التحقق من الحقول الفارغة
         if not username or not password:
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("login"))
 
-        # التحقق من الأدمن
         if username == "admin" and password == "22@22":
             session.permanent = True
             session["user"] = {"username": "admin", "role": "admin"}
-            print("DEBUG: Logged in admin ->", session.get("user"))
             flash("✅ مرحباً مدير النظام")
             return redirect(url_for("admin"))
 
-        # التحقق من المستخدم العادي (ابحث بالاسم ثم قارن الباسورد هنا)
         try:
             user = users_col.find_one({"username": username})
         except Exception:
@@ -269,17 +258,13 @@ def login():
         if user and user.get("password") == password:
             session.permanent = True
             session["user"] = {"username": username, "role": "user"}
-            print("DEBUG: Logged in user ->", session.get("user"))
             flash("✅ تسجيل الدخول ناجح")
-            # نوجه المستخدم مباشرة لصفحته الشخصية
             return redirect(url_for("user_page"))
 
-        # إذا لم تتطابق البيانات
         flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
         return redirect(url_for("login"))
 
     return render_template("login.html")
-
 
 # ----------------- تسجيل مستخدم جديد -----------------
 @app.route("/register", methods=["GET", "POST"])
@@ -339,6 +324,3 @@ def logout():
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-
