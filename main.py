@@ -135,24 +135,15 @@ def index():
 # ----------------- صفحة الأدمن -----------------
 @app.route("/admin")
 def admin():
-    user_session = session.get("user")
-    if not user_session or user_session.get("role") != "admin":
-        flash("❌ لا تمتلك صلاحية الدخول")
-        return redirect(url_for("login"))
-
+    # لا يوجد فحص جلسة — الدخول فقط من كلمة المرور في index.html
     try:
         users = list(users_col.find())
-    except Exception:
-        traceback.print_exc()
-        users = []
-
-    try:
         tickets = list(tickets_col.find())
-    except Exception:
-        traceback.print_exc()
-        tickets = []
+    except:
+        users, tickets = [], []
 
     return render_template("admin.html", users=users, tickets=tickets)
+
 
 # ----------------- صفحة اليوزر -----------------
 @app.route("/user")
@@ -327,3 +318,4 @@ def logout():
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
+
