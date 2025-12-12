@@ -146,6 +146,9 @@ def edit_user(username):
     if "is_admin" not in session:
         return redirect(url_for("index"))
 
+    db = get_db()
+    users_collection = db.users  # <- لازم تضيف ده
+
     user = users_collection.find_one({"username": username})
 
     if not user:
@@ -162,6 +165,19 @@ def edit_user(username):
         return redirect(url_for("admin"))
 
     return render_template("edit_user.html", user=user)
+
+@app.route("/delete_user/<username>")
+def delete_user(username):
+    if "is_admin" not in session:
+        return redirect(url_for("index"))
+
+    db = get_db()
+    users_collection = db.users  # <- لازم تضيف ده
+
+    users_collection.delete_one({"username": username})
+    flash("تم حذف المستخدم بنجاح")
+    return redirect(url_for("admin"))
+
 
 # المستخدمين العاديين
 # =====================
@@ -297,18 +313,12 @@ def logout():
     return redirect(url_for("index"))
 
 # =====================
-@app.route("/delete_user/<username>")
-def delete_user(username):
-    if "is_admin" not in session:
-        return redirect(url_for("index"))
 
-    users_collection.delete_one({"username": username})
-    flash("تم حذف المستخدم بنجاح")
-    return redirect(url_for("admin"))
 
 # تشغيل السيرفر
 # =====================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
