@@ -173,25 +173,43 @@ def user_card(card_number):
     return render_template("user_card.html", user=user)
 
 # ----------------- تسجيل الدخول -----------------
+# ----------------- تسجيل الدخول -----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = (request.form.get("username") or "").strip()
-        password = request.form.get("password") or ""
 
-        # الأدمن
+        # جلب البيانات وإزالة المسافات
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "").strip()
+
+        # التحقق من الحقول الفارغة
+        if not username or not password:
+            flash("❌ الرجاء تعبئة جميع الحقول")
+            return redirect(url_for("login"))
+
+        # التحقق من الأدمن
         if username == "admin" and password == "22@22":
             session["user"] = {"username": "admin", "role": "admin"}
+            flash("✅ مرحباً مدير النظام")
             return redirect(url_for("admin"))
 
-        # المستخدم
-        user = users_col.find_one({"username": username, "password": password})
+        # التحقق من المستخدم العادي
+        user = users_col.find_one({
+            "username": username,
+            "password": password
+        })
+
         if user:
             session["user"] = {"username": username, "role": "user"}
-            return redirect(url_for("index"))  # ← الآن يفتح الرئيسية
+            flash("✅ تسجيل الدخول ناجح")
+            return redirect(url_for("index"))
 
-        flash("❌ خطأ في اسم المستخدم أو كلمة المرور")
+        # إذا لم تتطابق البيانات
+        flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
+        return redirect(url_for("login"))
+
     return render_template("login.html")
+
 
 # ----------------- تسجيل مستخدم جديد -----------------
 @app.route("/register", methods=["GET", "POST"])
@@ -236,3 +254,4 @@ def logout():
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
+
