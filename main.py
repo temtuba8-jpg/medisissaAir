@@ -297,8 +297,18 @@ def logout():
     return redirect(url_for("index"))
 
 # =====================
+@app.route("/delete_user/<username>")
+def delete_user(username):
+    if "is_admin" not in session:
+        return redirect(url_for("index"))
+
+    users_collection.delete_one({"username": username})
+    flash("تم حذف المستخدم بنجاح")
+    return redirect(url_for("admin"))
+
 # تشغيل السيرفر
 # =====================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
