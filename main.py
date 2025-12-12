@@ -27,8 +27,8 @@ cluster = "cluster1.6wgwgl5.mongodb.net"
 database_name = "sahoor"
 uri = f"mongodb+srv://{username}:{password_escaped}@{cluster}/{database_name}?retryWrites=true&w=majority"
 
-# دالة للحصول على db و collections بعد fork
 def get_db():
+    """دالة للحصول على اتصال MongoDB"""
     try:
         client = MongoClient(uri, serverSelectionTimeoutMS=10000)
         db = client[database_name]
@@ -108,6 +108,8 @@ def ensure_admin():
 # =====================
 # Routes
 # =====================
+
+# الصفحة الرئيسية
 @app.route("/")
 def index():
     db = get_db()
@@ -149,6 +151,55 @@ def admin():
 
     return render_template("admin.html", users=users, players=players, ads=ads)
 
+# ----------------- صفحة تسجيل المستخدم -----------------
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    db = get_db()
+    users_col = db.users
+
+    if request.method == "POST":
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "").strip()
+        full_name = request.form.get("full_name")
+        phone = request.form.get("phone")
+        address = request.form.get("address")
+        national_id = request.form.get("national_id")
+
+        if not username or not password:
+            flash("❌ الرجاء تعبئة جميع الحقول")
+            return redirect(url_for("register"))
+
+        if users_col.find_one({"username": username}):
+            flash("❌ اسم المستخدم موجود")
+            return redirect(url_for("register"))
+
+        photo_file = request.files.get("photo")
+        photo_url = save_photo_to_db(photo_file) if photo_file else ""
+
+        new_user = {
+            "username": username,
+            "password": password,
+            "full_name": full_name,
+            "phone": phone,
+            "address": address,
+            "national_id": national_id,
+            "photo_url": photo_url,
+            "role": "user",
+            "card_number": get_next_card_number(users_col),
+            "registration_date": datetime.now().strftime("%Y-%m-%d")
+        }
+
+        try:
+            users_col.insert_one(new_user)
+            flash("✅ تم التسجيل بنجاح")
+            return redirect(url_for("login"))
+        except Exception:
+            traceback.print_exc()
+            flash("❌ خطأ في حفظ المستخدم")
+            return redirect(url_for("register"))
+
+    return render_template("register.html")
+
 # ----------------- تسجيل الدخول -----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -184,8 +235,63 @@ def login():
 
     return render_template("login.html")
 
-# باقي الكود يمكن نسخه كما هو مع استبدال كل استخدام لـ db, users_col, players_col, ads_col بدالة get_db()
-# مثال: في register, user_page, add_ad, delete_user
+# ----------------- صفحة اليوزر -----------------
+@app.route("/user")
+def user_page():
+    user_session = session.get("user")
+    if not user_session or user_session.get("role") != "user":
+        flash("❌ يجب تسجيل الدخول")
+        return redirect(url_for("login"))
+
+    db = get_db()
+    users_col = db.users
+
+    try:
+        user = users_col.find_one({"username": user_session["username"]})
+    except Exception:
+        traceback.print_exc()
+        flash("❌ خطأ في جلب بيانات المستخدم")
+        return redirect(url_for("login"))
+
+    if not user:
+        flash("❌ الحساب غير موجود")
+        return redirect(url_for("login"))
+
+    # إنشاء QR للبطاقة
+    qr_url = f"{request.host_url}user_card/{user['card_number']}"
+    qr_code = generate_qr_base64(qr_url)
+
+    expiry = datetime.strptime(user["registration_date"], "%Y-%m-%d") + timedelta(days=180)
+
+    return render_template(
+        "user.html",
+        user=user,
+        registration_date=user["registration_date"],
+        expiry_date=expiry.strftime("%Y-%m-%d"),
+        qr_code=qr_code
+    )
+
+# ----------------- صفحة بطاقة المستخدم -----------------
+@app.route("/user_card/<int:card_number>")
+def user_card(card_number):
+    db = get_db()
+    users_col = db.users
+    try:
+        user = users_col.find_one({"card_number": card_number})
+    except Exception:
+        traceback.print_exc()
+        user = None
+
+    if not user:
+        return "❌ البطاقة غير موجودة"
+    return render_template("user_card.html", user=user)
+
+# ----------------- تسجيل الخروج -----------------
+@app.route("/logout")
+def logout():
+    session.pop("user", None)
+    flash("تم تسجيل الخروج")
+    return redirect(url_for("index"))
 
 # ----------------- تشغيل السيرفر -----------------
 if __name__ == "__main__":
