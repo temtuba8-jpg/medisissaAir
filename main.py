@@ -12,11 +12,11 @@ app = Flask(__name__)
 app.secret_key = "secretkey123"
 
 # =====================
-# إعدادات الجلسة HTTPS
+# إعدادات الجلسة (تعمل على localhost و HTTPS)
 # =====================
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'
-app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_SECURE'] = False  # أثناء التطوير على localhost
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.permanent_session_lifetime = timedelta(days=1)
 
 # =====================
@@ -103,9 +103,9 @@ def index():
 
     return render_template("index.html", players=players, ads=ads)
 
+# صفحة الأدمن
 @app.route("/admin")
 def admin():
-    # تحقق من الأدمن الثابت
     if not session.get("is_admin"):
         flash("❌ الرجاء إدخال كلمة سر الأدمن أولاً")
         return redirect(url_for("index"))
@@ -124,17 +124,16 @@ def admin():
 
     return render_template("admin.html", users=users, players=players, ads=ads)
 
-# تحقق كلمة سر الأدمن الثابتة
 @app.route("/admin_verify", methods=["POST"])
 def admin_verify():
     password = request.form.get("password", "")
     if password == ADMIN_PASSWORD:
         session["is_admin"] = True
+        flash("✅ تم تسجيل الدخول كأدمن")
         return redirect(url_for("admin"))
     flash("❌ كلمة السر غير صحيحة")
     return redirect(url_for("index"))
 
-# تسجيل خروج الأدمن
 @app.route("/logout_admin")
 def logout_admin():
     session.pop("is_admin", None)
@@ -142,7 +141,7 @@ def logout_admin():
     return redirect(url_for("index"))
 
 # =====================
-# Routes للمستخدمين العاديين
+# المستخدمين العاديين
 # =====================
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -212,8 +211,8 @@ def login():
             user = None
 
         if user and user.get("password") == password:
-            session.permanent = True
-            session["user"] = {"username": username, "role": "user"}
+            session["user"] = {"username": username, "role": "user"}  # ضع أولاً
+            session.permanent = True  # ثم اجعل الجلسة دائمة
             flash(f"✅ تسجيل الدخول ناجح (user)")
             return redirect(url_for("user_page"))
 
