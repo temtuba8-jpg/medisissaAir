@@ -11,9 +11,11 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
-# تحسين إعدادات الجلسة لتعمل على Render HTTPS
+# =====================
+# إعدادات الجلسة HTTPS
+# =====================
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # مهم للـ HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'
 app.config['SESSION_COOKIE_SECURE'] = True
 app.permanent_session_lifetime = timedelta(days=1)
 
@@ -40,10 +42,6 @@ def get_db():
 # =====================
 # Helpers
 # =====================
-def allowed_file(filename):
-    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-    return ext in {"png", "jpg", "jpeg", "gif"}
-
 def save_photo_to_db(photo_file):
     try:
         data = photo_file.read()
@@ -78,31 +76,9 @@ def get_next_card_number(users_col):
     return 1
 
 # =====================
-# إنشاء الأدمن تلقائياً (اختياري)
+# كلمة سر الأدمن الثابتة
 # =====================
-def ensure_admin():
-    db = get_db()
-    users_col = db.users
-    try:
-        if users_col.count_documents({"username": "admin"}) == 0:
-            admin = {
-                "username": "admin",
-                "password": "22@22",
-                "full_name": "مدير النادي",
-                "phone": "0000000000",
-                "address": "المدينة",
-                "national_id": "000000000000",
-                "photo_url": "",
-                "role": "admin",
-                "card_number": 0,
-                "registration_date": datetime.now().strftime("%Y-%m-%d")
-            }
-            users_col.insert_one(admin)
-            print("✅ Admin Created in DB")
-        else:
-            print("ℹ️ Admin already exists in DB")
-    except Exception:
-        traceback.print_exc()
+ADMIN_PASSWORD = "22@22"
 
 # =====================
 # Routes
@@ -125,14 +101,14 @@ def index():
         traceback.print_exc()
         ads = []
 
-    return render_template("index.html", players=players, ads=ads, user=session.get("user"))
+    return render_template("index.html", players=players, ads=ads)
 
 @app.route("/admin")
 def admin():
-    user_session = session.get("user")
-    if not user_session or user_session.get("role") != "admin":
-        flash("❌ لا تمتلك صلاحية الدخول")
-        return redirect(url_for("login"))
+    # تحقق من الأدمن الثابت
+    if not session.get("is_admin"):
+        flash("❌ الرجاء إدخال كلمة سر الأدمن أولاً")
+        return redirect(url_for("index"))
 
     db = get_db()
     users_col = db.users
@@ -148,6 +124,26 @@ def admin():
 
     return render_template("admin.html", users=users, players=players, ads=ads)
 
+# تحقق كلمة سر الأدمن الثابتة
+@app.route("/admin_verify", methods=["POST"])
+def admin_verify():
+    password = request.form.get("password", "")
+    if password == ADMIN_PASSWORD:
+        session["is_admin"] = True
+        return redirect(url_for("admin"))
+    flash("❌ كلمة السر غير صحيحة")
+    return redirect(url_for("index"))
+
+# تسجيل خروج الأدمن
+@app.route("/logout_admin")
+def logout_admin():
+    session.pop("is_admin", None)
+    flash("✅ تم تسجيل الخروج من الإدارة")
+    return redirect(url_for("index"))
+
+# =====================
+# Routes للمستخدمين العاديين
+# =====================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     db = get_db()
@@ -209,13 +205,6 @@ def login():
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("login"))
 
-        # تحقق من الأدمن الافتراضي مباشرة
-        if username == "admin" and password == "22@22":
-            session.permanent = True
-            session["user"] = {"username": "admin", "role": "admin"}
-            flash("✅ تسجيل الدخول ناجح (admin)")
-            return redirect(url_for("admin"))
-
         try:
             user = users_col.find_one({"username": username})
         except Exception:
@@ -224,13 +213,9 @@ def login():
 
         if user and user.get("password") == password:
             session.permanent = True
-            role = user.get("role", "user")
-            session["user"] = {"username": username, "role": role}
-            flash(f"✅ تسجيل الدخول ناجح ({role})")
-            if role == "admin":
-                return redirect(url_for("admin"))
-            else:
-                return redirect(url_for("user_page"))
+            session["user"] = {"username": username, "role": "user"}
+            flash(f"✅ تسجيل الدخول ناجح (user)")
+            return redirect(url_for("user_page"))
 
         flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
         return redirect(url_for("login"))
@@ -240,7 +225,7 @@ def login():
 @app.route("/user")
 def user_page():
     user_session = session.get("user")
-    if not user_session or user_session.get("role") != "user":
+    if not user_session:
         flash("❌ يجب تسجيل الدخول")
         return redirect(url_for("login"))
 
@@ -287,9 +272,11 @@ def user_card(card_number):
 @app.route("/logout")
 def logout():
     session.pop("user", None)
-    flash("تم تسجيل الخروج")
+    flash("✅ تم تسجيل الخروج")
     return redirect(url_for("index"))
 
+# =====================
+# تشغيل السيرفر
+# =====================
 if __name__ == "__main__":
-    ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
