@@ -11,10 +11,10 @@ from datetime import datetime, timedelta
 app = Flask(__name__)
 app.secret_key = "secretkey123"
 
-# تحسين إعدادات الجلسة
+# تحسين إعدادات الجلسة لتعمل على Render HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
-app.config['SESSION_COOKIE_SECURE'] = True  # Render يستخدم HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # مهم للـ HTTPS
+app.config['SESSION_COOKIE_SECURE'] = True
 app.permanent_session_lifetime = timedelta(days=1)
 
 # =====================
@@ -78,7 +78,7 @@ def get_next_card_number(users_col):
     return 1
 
 # =====================
-# إنشاء الأدمن تلقائياً
+# إنشاء الأدمن تلقائياً (اختياري)
 # =====================
 def ensure_admin():
     db = get_db()
@@ -108,7 +108,6 @@ def ensure_admin():
 # Routes
 # =====================
 
-# الصفحة الرئيسية
 @app.route("/")
 def index():
     db = get_db()
@@ -128,7 +127,6 @@ def index():
 
     return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
-# ----------------- صفحة الأدمن -----------------
 @app.route("/admin")
 def admin():
     user_session = session.get("user")
@@ -150,7 +148,6 @@ def admin():
 
     return render_template("admin.html", users=users, players=players, ads=ads)
 
-# ----------------- صفحة تسجيل المستخدم -----------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
     db = get_db()
@@ -199,7 +196,6 @@ def register():
 
     return render_template("register.html")
 
-# ----------------- تسجيل الدخول -----------------
 @app.route("/login", methods=["GET", "POST"])
 def login():
     db = get_db()
@@ -213,6 +209,13 @@ def login():
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("login"))
 
+        # تحقق من الأدمن الافتراضي مباشرة
+        if username == "admin" and password == "22@22":
+            session.permanent = True
+            session["user"] = {"username": "admin", "role": "admin"}
+            flash("✅ تسجيل الدخول ناجح (admin)")
+            return redirect(url_for("admin"))
+
         try:
             user = users_col.find_one({"username": username})
         except Exception:
@@ -222,7 +225,6 @@ def login():
         if user and user.get("password") == password:
             session.permanent = True
             role = user.get("role", "user")
-            # إصلاح: تأكد من كتابة الدور بشكل صحيح
             session["user"] = {"username": username, "role": role}
             flash(f"✅ تسجيل الدخول ناجح ({role})")
             if role == "admin":
@@ -235,7 +237,6 @@ def login():
 
     return render_template("login.html")
 
-# ----------------- صفحة اليوزر -----------------
 @app.route("/user")
 def user_page():
     user_session = session.get("user")
@@ -269,7 +270,6 @@ def user_page():
         qr_code=qr_code
     )
 
-# ----------------- صفحة بطاقة المستخدم -----------------
 @app.route("/user_card/<int:card_number>")
 def user_card(card_number):
     db = get_db()
@@ -284,14 +284,12 @@ def user_card(card_number):
         return "❌ البطاقة غير موجودة"
     return render_template("user_card.html", user=user)
 
-# ----------------- تسجيل الخروج -----------------
 @app.route("/logout")
 def logout():
     session.pop("user", None)
     flash("تم تسجيل الخروج")
     return redirect(url_for("index"))
 
-# ----------------- تشغيل السيرفر -----------------
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
