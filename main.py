@@ -83,7 +83,7 @@ def get_next_card_number():
     return 1
 
 # =====================
-# إنشاء الأدمن تلقائياً
+# إنشاء الأدمن تلقائياً في قاعدة البيانات
 # =====================
 def ensure_admin():
     try:
@@ -101,9 +101,9 @@ def ensure_admin():
                 "registration_date": datetime.now().strftime("%Y-%m-%d")
             }
             users_col.insert_one(admin)
-            print("✅ Admin Created")
+            print("✅ Admin Created in DB")
         else:
-            print("ℹ️ Admin Exists")
+            print("ℹ️ Admin already exists in DB")
     except Exception:
         traceback.print_exc()
 
@@ -243,23 +243,22 @@ def login():
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("login"))
 
-        if username == "admin" and password == "22@22":
-            session.permanent = True
-            session["user"] = {"username": "admin", "role": "admin"}
-            flash("✅ مرحباً مدير النظام")
-            return redirect(url_for("admin"))
-
         try:
             user = users_col.find_one({"username": username})
         except Exception:
             traceback.print_exc()
             user = None
 
+        # تحقق من جميع المستخدمين بما فيهم الأدمن
         if user and user.get("password") == password:
             session.permanent = True
-            session["user"] = {"username": username, "role": "user"}
-            flash("✅ تسجيل الدخول ناجح")
-            return redirect(url_for("user_page"))
+            role = user.get("role", "user")
+            session["user"] = {"username": username, "role": role}
+            flash(f"✅ تسجيل الدخول ناجح ({role})")
+            if role == "admin":
+                return redirect(url_for("admin"))
+            else:
+                return redirect(url_for("user_page"))
 
         flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
         return redirect(url_for("login"))
