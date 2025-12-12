@@ -133,18 +133,36 @@ def index():
     return render_template("index.html", players=players, ads=ads, user=session.get("user"))
 
 # ----------------- صفحة الأدمن -----------------
-@app.route("/admin")
+@@app.route("/admin")
 def admin():
     try:
-        # إذا لم تكن المجموعات موجودة، استخدم قائمة فارغة
+        # إذا لم تكن المجموعات موجودة استخدم قائمة فارغة
         users = list(users_col.find()) if "users" in db.list_collection_names() else []
-        tickets = list(tickets_col.find()) if "tickets" in db.list_collection_names() else []
+        players = list(players_col.find()) if "players" in db.list_collection_names() else []
+        ads = list(ads_col.find()) if "ads" in db.list_collection_names() else []
     except Exception as e:
-        # طباعة الخطأ للdebug
         print("❌ Error in /admin:", e)
-        users, tickets = [], []
+        users, players, ads = [], [], []
 
-    return render_template("admin.html", users=users, tickets=tickets)
+    return render_template("admin.html", users=users, players=players, ads=ads)
+#_______
+@app.route("/delete_user/<username>")
+def delete_user(username):
+    users_col.delete_one({"username": username})
+    flash("✅ تم حذف المستخدم")
+    return redirect(url_for("admin"))
+####________
+@app.route("/add_ad", methods=["GET","POST"])
+def add_ad():
+    if request.method == "POST":
+        title = request.form.get("title")
+        photo_file = request.files.get("photo")
+        photo_url = save_photo_to_db(photo_file) if photo_file else ""
+        ads_col.insert_one({"title": title, "photo_url": photo_url})
+        flash("✅ تم إضافة الإعلان")
+        return redirect(url_for("admin"))
+    return render_template("add_ad.html")
+
 
 
 
@@ -321,5 +339,6 @@ def logout():
 if __name__ == "__main__":
     ensure_admin()
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
