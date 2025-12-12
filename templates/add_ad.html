@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إضافة إعلان جديد</title>
+</head>
+<body>
+    <h1>إضافة إعلان جديد</h1>
+    <form method="POST">
+        <label>عنوان الإعلان:</label>
+        <input type="text" name="title" required><br><br>
+
+        <label>وصف الإعلان:</label>
+        <textarea name="description" required></textarea><br><br>
+
+        <button type="submit">إضافة الإعلان</button>
+    </form>
+    <br>
+    <a href="{{ url_for('admin') }}">رجوع لإدارة الأدمن</a>
+</body>
+</html>
