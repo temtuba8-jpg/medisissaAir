@@ -31,7 +31,7 @@ header{
 
 .logo{
     width:100px;
-    animation:heartbeat 1s infinite;
+    animation:heartbeat 1.2s infinite;
 }
 
 @keyframes heartbeat{
@@ -61,7 +61,7 @@ nav a:hover,.admin-btn:hover{
     color:#8B0000;
 }
 
-/* ================= شريط الأخبار (أبطأ) ================= */
+/* ================= الأخبار ================= */
 .news-bar{
     width:100%;
     background:#800000;
@@ -83,7 +83,7 @@ nav a:hover,.admin-btn:hover{
     to{transform:translateX(100%)}
 }
 
-/* ================= البطاقات ================= */
+/* ================= اللاعبين ================= */
 h2{
     text-align:center;
     color:#8B0000;
@@ -98,74 +98,66 @@ h2{
 }
 
 .player-card{
-    position:relative;
     background:#fff;
     border-radius:16px;
     overflow:hidden;
     box-shadow:0 10px 25px rgba(0,0,0,.15);
     transition:.35s;
-    animation:fadeUp .8s ease forwards;
 }
 
 .player-card:hover{
-    transform:translateY(-10px) scale(1.03);
+    transform:translateY(-8px) scale(1.03);
     box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
 
-/* شعار مائي */
-.player-card::before{
-    content:"";
-    position:absolute;
-    top:10px;
-    left:10px;
-    width:70px;
-    height:70px;
-    background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
-    background-size:contain;
-    opacity:.15;
-}
-
-/* صورة */
+/* صورة اللاعب */
 .player-card img{
     width:100%;
     height:220px;
     object-fit:cover;
-    transition:.5s;
+    display:block;
 }
 
-.player-card:hover img{
-    transform:scale(1.08);
-}
-
-/* الاسم */
+/* الاسم + العلامة المائية */
 .player-name{
+    position:relative;
     background:#800000;
     color:gold;
     text-align:center;
-    padding:10px;
+    padding:28px 10px 12px;
     font-weight:bold;
-    transition:.3s;
+    overflow:hidden;
 }
 
-.player-card:hover .player-name{
-    background:#660000;
-    letter-spacing:1px;
+/* العلامة المائية (logo1.png) */
+.player-name::before{
+    content:"";
+    position:absolute;
+    top:4px;
+    left:50%;
+    transform:translateX(-50%);
+    width:42px;
+    height:42px;
+    background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
+    background-size:contain;
+    opacity:.45;
+    animation:softPulse 2.8s ease-in-out infinite;
 }
 
-/* دخول تدريجي */
-@keyframes fadeUp{
-    from{opacity:0;transform:translateY(20px)}
-    to{opacity:1;transform:translateY(0)}
+/* نبض خفيف */
+@keyframes softPulse{
+    0%,100%{transform:translateX(-50%) scale(1)}
+    50%{transform:translateX(-50%) scale(1.12)}
 }
 
-/* الفاصل */
+/* ================= فاصل ================= */
 .divider{
     width:70%;
     margin:40px auto;
     border:2px solid #800000;
 }
 
-/* ================= المودال ================= */
+/* ================= مودال الإدارة ================= */
 .modal-bg{
     display:none;
     position:fixed;
@@ -211,9 +203,7 @@ button{
     <h1>نادي مديسيسة الرياضي</h1>
 
     <div class="news-bar">
-        <span>
-        قريبًا إطلاق المنصة الرقمية لنادي مديسيسة الرياضي – بطاقة رقمية ذكية – خدمات رياضية وإدارية متكاملة
-        </span>
+        <span>قريبًا إطلاق المنصة الرقمية لنادي مديسيسة الرياضي – بطاقة رقمية ذكية – خدمات متكاملة</span>
     </div>
 
     <nav>
@@ -223,7 +213,6 @@ button{
     </nav>
 </header>
 
-<!-- مودال الإدارة -->
 <div class="modal-bg" id="adminModal">
     <div class="modal-box">
         <h3>دخول الإدارة</h3>
@@ -233,7 +222,6 @@ button{
     </div>
 </div>
 
-<!-- ================= اللاعبين ================= -->
 <section>
 <h2>اللاعبين</h2>
 
