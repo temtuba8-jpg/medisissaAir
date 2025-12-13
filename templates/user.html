@@ -18,10 +18,10 @@ body{
     align-items:center;
 }
 
-/* الحاوية */
-.card-container{
-    max-width:600px;
+/* منطقة التصدير */
+#pdfArea{
     width:100%;
+    max-width:600px;
 }
 
 /* البطاقة */
@@ -36,17 +36,13 @@ body{
     overflow:hidden;
 }
 
-/* علامة مائية نصية (مضادة للتزوير) */
+/* شعار مائي كبير (20%) */
 .user-card::after{
-    content:"MEDISSA OFFICIAL";
+    content:"";
     position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%) rotate(-25deg);
-    font-size:48px;
-    color:#ffffff;
-    opacity:.06;
-    white-space:nowrap;
+    inset:0;
+    background:url('static/images/logo.png') no-repeat center/320px;
+    opacity:0.20;
     z-index:0;
 }
 
@@ -69,15 +65,15 @@ body{
     z-index:3;
 }
 
-/* صورة المستخدم (نظيفة بدون أي تغطية) */
+/* صورة المستخدم */
 .profile-box{
     width:120px;
     height:120px;
     border:3px solid gold;
     border-radius:16px;
     overflow:hidden;
-    box-shadow:0 5px 15px rgba(0,0,0,.4);
     background:#fff;
+    box-shadow:0 5px 15px rgba(0,0,0,.4);
 }
 
 .profile-box img{
@@ -86,16 +82,15 @@ body{
     object-fit:cover;
 }
 
-/* شعار هوية صغير تحت الصورة */
+/* شعار هوية صغير */
 .identity-logo{
     width:46px;
     height:46px;
     margin:8px 0;
     background:url('static/images/logo.png') no-repeat center/contain;
-    opacity:.95;
 }
 
-/* QR تحقق */
+/* QR */
 .qr-box img{
     width:95px;
     border:2px solid gold;
@@ -113,7 +108,7 @@ body{
 .user-info h2{margin:0 0 8px}
 .user-info p{margin:3px 0;font-size:14px}
 
-/* رقم تحقق */
+/* كود تحقق */
 .verify-code{
     margin-top:8px;
     padding:6px 10px;
@@ -125,12 +120,11 @@ body{
 
 /* مميزات */
 .card-features{
-    max-width:600px;
-    width:100%;
     background:#fff;
     border-radius:18px;
     margin-top:15px;
     box-shadow:0 10px 25px rgba(0,0,0,.25);
+    overflow:hidden;
 }
 
 .card-features h3{
@@ -175,7 +169,8 @@ body{
 
 <body>
 
-<div class="card-container" id="cardArea">
+<div id="pdfArea">
+
     <div class="user-card">
 
         <div class="logo-top"></div>
@@ -185,10 +180,8 @@ body{
                 <img src="{{ user.photo_url }}">
             </div>
 
-            <!-- شعار هوية -->
             <div class="identity-logo"></div>
 
-            <!-- QR تحقق -->
             <div class="qr-box">
                 <img src="data:image/png;base64,{{ qr_code }}">
             </div>
@@ -209,16 +202,17 @@ body{
         </div>
 
     </div>
-</div>
 
-<div class="card-features">
-    <h3>مميزات البطاقة</h3>
-    <ul>
-        <li>بطاقة رسمية معتمدة</li>
-        <li>QR تحقق مباشر</li>
-        <li>حماية ضد التزوير</li>
-        <li>صالحة للطباعة</li>
-    </ul>
+    <div class="card-features">
+        <h3>مميزات البطاقة</h3>
+        <ul>
+            <li>بطاقة رسمية معتمدة</li>
+            <li>QR تحقق مباشر</li>
+            <li>حماية ضد التزوير</li>
+            <li>صالحة للطباعة</li>
+        </ul>
+    </div>
+
 </div>
 
 <a class="download-btn" onclick="downloadPDF()">تحميل البطاقة PDF</a>
@@ -229,16 +223,20 @@ body{
 <script>
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
-    const card = document.getElementById('cardArea');
-    const rect = card.getBoundingClientRect();
+    const area = document.getElementById('pdfArea');
+    const rect = area.getBoundingClientRect();
 
-    const canvas = await html2canvas(card,{scale:3,useCORS:true});
+    const canvas = await html2canvas(area,{
+        scale:3,
+        useCORS:true
+    });
+
     const imgData = canvas.toDataURL('image/png',1.0);
 
     const pdf = new jsPDF({
         orientation:'landscape',
         unit:'px',
-        format:[rect.width,rect.height]
+        format:[rect.width, rect.height]
     });
 
     pdf.addImage(imgData,'PNG',0,0,rect.width,rect.height);
