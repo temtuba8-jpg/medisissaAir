@@ -15,24 +15,53 @@ body {
     display:flex;
     justify-content:center;
     align-items:center;
+    flex-direction:column;
     min-height:100vh;
 }
 
+/* الحاوية */
 .card-container {
     max-width:600px;
     width:100%;
+    margin-bottom:20px;
 }
 
+/* البطاقة */
 .user-card {
     position:relative;
     background:#800000; /* عنابي */
-    border-radius:15px;
+    border-radius:20px;
     padding:20px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
     display:flex;
     align-items:center;
     min-height:250px;
     overflow:hidden;
+    animation: pulse 3s infinite;
+    transition: transform 0.3s;
+}
+
+.user-card:hover {
+    transform: scale(1.02);
+}
+
+/* نبض خفيف */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.005); }
+}
+
+/* نقوش نوبية في الخلفية */
+.user-card::after {
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:url('static/images/nubian_pattern.png') repeat;
+    opacity:0.05;
+    z-index:0;
 }
 
 /* شعار شفاف في المنتصف */
@@ -63,10 +92,10 @@ body {
 /* صندوق صورة العضو */
 .profile-box {
     flex-shrink:0;
-    width:140px;
-    height:140px;
+    width:120px;
+    height:120px;
     border:3px solid gold;
-    border-radius:10px;
+    border-radius:15px;
     overflow:hidden;
     margin-left:20px;
     z-index:2;
@@ -78,11 +107,12 @@ body {
     object-fit:cover;
 }
 
-/* بيانات المستخدم على اليمين */
+/* بيانات المستخدم */
 .user-info {
     color:white;
     text-align:right;
     z-index:2;
+    flex:1;
 }
 
 .user-info h2 {
@@ -97,7 +127,7 @@ body {
 
 /* QR كود */
 .qr-box {
-    margin-top:15px;
+    margin-top:10px;
     text-align:right;
 }
 
@@ -106,12 +136,59 @@ body {
     border:2px solid gold;
     border-radius:8px;
 }
+
+/* مميزات البطاقة */
+.card-features {
+    max-width:600px;
+    background:white;
+    border-radius:15px;
+    padding:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    margin-top:15px;
+}
+
+.card-features h3 {
+    margin:0 0 10px 0;
+    color:#800000;
+}
+
+.card-features ul {
+    margin:0;
+    padding-left:20px;
+}
+
+.card-features li {
+    margin-bottom:5px;
+}
+
+/* زر تحميل PDF */
+.download-btn {
+    display:block;
+    margin:15px auto 0;
+    padding:10px 20px;
+    background:#800000;
+    color:white;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    text-align:center;
+    font-size:1em;
+    text-decoration:none;
+}
+
+/* متجاوب */
+@media (max-width: 700px) {
+    .user-card { flex-direction: column; align-items:center; min-height: auto; }
+    .profile-box { margin-left:0; margin-bottom:15px; }
+    .user-info { text-align:center; }
+    .qr-box { text-align:center; }
+}
 </style>
 </head>
 <body>
+
 <div class="card-container">
     <div class="user-card">
-
         <!-- شعار أعلى البطاقة -->
         <div class="logo-top"></div>
 
@@ -135,9 +212,43 @@ body {
                 <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
             </div>
         </div>
-
     </div>
 </div>
+
+<!-- مميزات البطاقة -->
+<div class="card-features">
+    <h3>مميزات البطاقة لحاملها:</h3>
+    <ul>
+        <li>الدخول المجاني إلى أنشطة النادي</li>
+        <li>الحصول على خصومات على الدورات والفعاليات</li>
+        <li>إمكانية المشاركة في البطولات والمسابقات</li>
+        <li>تحديث مستمر للعضوية إلكترونيًا</li>
+    </ul>
+    <a class="download-btn" href="#" onclick="downloadPDF()">تحميل البطاقة كـ PDF</a>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    var doc = new jsPDF({
+        orientation: "landscape",
+        unit: "px",
+        format: [600, 300]
+    });
+    var card = document.querySelector('.user-card');
+    html2canvas(card).then(canvas => {
+        var imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData, 'PNG', 0, 0, 600, 300);
+        doc.save('بطاقة_العضو.pdf');
+    });
+}
+
+// تحميل البطاقة يحتاج مكتبة html2canvas
+var script = document.createElement('script');
+script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+document.head.appendChild(script);
+</script>
+
 </body>
 </html>
-
