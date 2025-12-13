@@ -3,19 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <title>إضافة لاعب جديد</title>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background: #faf3e0; padding: 20px; }
+        h1 { color: #800000; }
+        form { margin-bottom: 30px; }
+        label { display: block; margin: 8px 0 4px; }
+        input[type="text"] { width: 300px; padding: 6px; border-radius: 4px; border: 1px solid #ccc; }
+        button { background: #800000; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+        th { background: #800000; color: white; }
+        a { text-decoration: none; color: #800000; }
+    </style>
 </head>
 <body>
     <h1>إضافة لاعب جديد</h1>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div style="color: {% if category=='error' %}red{% else %}green{% endif %}; margin-bottom:10px;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
     <form method="POST">
         <label>اسم اللاعب:</label>
-        <input type="text" name="name" required><br><br>
+        <input type="text" name="name" required>
 
         <label>المركز أو الوظيفة:</label>
-        <input type="text" name="position" required><br><br>
+        <input type="text" name="position" required>
 
         <button type="submit">إضافة اللاعب</button>
     </form>
-    <br>
+
     <a href="{{ url_for('admin') }}">رجوع لإدارة الأدمن</a>
+
+    {% if players %}
+    <h2>قائمة اللاعبين</h2>
+    <table>
+        <tr>
+            <th>الاسم</th>
+            <th>المركز</th>
+            <th>تاريخ الإضافة</th>
+            <th>الإجراءات</th>
+        </tr>
+        {% for player in players %}
+        <tr>
+            <td>{{ player.name }}</td>
+            <td>{{ player.position }}</td>
+            <td>{{ player.added_date }}</td>
+            <td>
+                <a href="{{ url_for('edit_player', player_id=player._id) }}">تعديل</a> |
+                <a href="{{ url_for('delete_player', player_id=player._id) }}" onclick="return confirm('هل أنت متأكد من حذف هذا اللاعب؟');">حذف</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
 </body>
 </html>
