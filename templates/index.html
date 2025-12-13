@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -98,6 +99,7 @@ h2{
 }
 
 .player-card{
+    position:relative;
     background:#fff;
     border-radius:16px;
     overflow:hidden;
@@ -124,30 +126,36 @@ h2{
     background:#800000;
     color:gold;
     text-align:center;
-    padding:28px 10px 12px;
+    padding:36px 10px 12px; /* فراغ للشعار */
     font-weight:bold;
     overflow:hidden;
 }
 
-/* العلامة المائية (logo1.png) */
-.player-name::before{
+/* العلامة المائية المتوسطة بين الصورة والاسم */
+.player-card::after{
     content:"";
     position:absolute;
-    top:4px;
+    top:200px; /* منتصف البطاقة تقريبا */
     left:50%;
     transform:translateX(-50%);
-    width:42px;
-    height:42px;
+    width:54px;
+    height:54px;
     background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
     background-size:contain;
-    opacity:.45;
-    animation:softPulse 2.8s ease-in-out infinite;
+    z-index:5;
+    animation:midPulse 2.6s ease-in-out infinite;
 }
 
-/* نبض خفيف */
-@keyframes softPulse{
-    0%,100%{transform:translateX(-50%) scale(1)}
-    50%{transform:translateX(-50%) scale(1.12)}
+/* نبض خفيف للعلامة المائية */
+@keyframes midPulse{
+    0%,100%{
+        transform:translateX(-50%) scale(1);
+        opacity:.45;
+    }
+    50%{
+        transform:translateX(-50%) scale(1.15);
+        opacity:.75;
+    }
 }
 
 /* ================= فاصل ================= */
