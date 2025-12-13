@@ -8,160 +8,166 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
-body{
-    font-family:'Cairo',sans-serif;
-    background:#f2f0ec;
-    margin:0;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+body {
+    font-family: 'Cairo', sans-serif;
+    background: #f2f0ec;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* منطقة التصدير */
-#pdfArea{
-    width:100%;
-    max-width:600px;
+/* منطقة البطاقة */
+#pdfArea {
+    width: 100%;
+    max-width: 600px;
 }
 
 /* البطاقة */
-.user-card{
-    position:relative;
-    background:linear-gradient(145deg,#7a0000,#a00000);
-    border-radius:20px;
-    padding:20px;
-    display:flex;
-    gap:15px;
-    box-shadow:0 15px 30px rgba(0,0,0,.4);
-    overflow:hidden;
+.user-card {
+    position: relative;
+    background: linear-gradient(145deg, #7a0000, #a00000);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    gap: 15px;
+    box-shadow: 0 15px 30px rgba(0,0,0,.4);
+    overflow: hidden;
 }
 
-/* شعار مائي كبير (20%) */
-.user-card::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:url('static/images/logo.png') no-repeat center/320px;
-    opacity:0.20;
-    z-index:0;
+/* شعار مائي */
+.user-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('static/images/logo.png') no-repeat center/320px;
+    opacity: 0.20;
+    z-index: 0;
 }
 
 /* شعار علوي */
-.logo-top{
-    position:absolute;
-    top:15px;
-    right:15px;
-    width:85px;
-    height:85px;
-    background:url('static/images/logo.png') no-repeat center/contain;
-    z-index:3;
+.logo-top {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 85px;
+    height: 85px;
+    background: url('static/images/logo.png') no-repeat center/contain;
+    z-index: 3;
 }
 
-/* عمود الصورة */
-.profile-column{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    z-index:3;
+/* عمود الصورة والباركود */
+.profile-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 3;
 }
 
 /* صورة المستخدم */
-.profile-box{
-    width:120px;
-    height:120px;
-    border:3px solid gold;
-    border-radius:16px;
-    overflow:hidden;
-    background:#fff;
-    box-shadow:0 5px 15px rgba(0,0,0,.4);
+.profile-box {
+    width: 120px;
+    height: 120px;
+    border: 3px solid gold;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,.4);
 }
 
-.profile-box img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
+.profile-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* شعار هوية صغير */
-.identity-logo{
-    width:46px;
-    height:46px;
-    margin:8px 0;
-    background:url('static/images/logo.png') no-repeat center/contain;
+/* شعار صغير */
+.identity-logo {
+    width: 46px;
+    height: 46px;
+    margin: 8px 0;
+    background: url('static/images/logo.png') no-repeat center/contain;
 }
 
 /* QR */
-.qr-box img{
-    width:95px;
-    border:2px solid gold;
-    border-radius:8px;
-    background:#fff;
+.qr-box img {
+    width: 95px;
+    height: 95px;
+    border: 2px solid gold;
+    border-radius: 8px;
+    background: #fff;
 }
 
-/* البيانات */
-.user-info{
-    color:#fff;
-    flex:1;
-    z-index:3;
+/* بيانات المستخدم */
+.user-info {
+    color: #fff;
+    flex: 1;
+    z-index: 3;
 }
 
-.user-info h2{margin:0 0 8px}
-.user-info p{margin:3px 0;font-size:14px}
+.user-info h2 {
+    margin: 0 0 8px;
+}
+.user-info p {
+    margin: 3px 0;
+    font-size: 14px;
+}
 
 /* كود تحقق */
-.verify-code{
-    margin-top:8px;
-    padding:6px 10px;
-    background:rgba(255,255,255,.15);
-    border-radius:8px;
-    font-size:13px;
-    display:inline-block;
+.verify-code {
+    margin-top: 8px;
+    padding: 6px 10px;
+    background: rgba(255,255,255,.15);
+    border-radius: 8px;
+    font-size: 13px;
+    display: inline-block;
 }
 
-/* مميزات */
-.card-features{
-    background:#fff;
-    border-radius:18px;
-    margin-top:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,.25);
-    overflow:hidden;
+/* مميزات البطاقة */
+.card-features {
+    background: #fff;
+    border-radius: 18px;
+    margin-top: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    overflow: hidden;
 }
 
-.card-features h3{
-    margin:0;
-    padding:12px;
-    background:#7a0000;
-    color:#fff;
-    text-align:center;
+.card-features h3 {
+    margin: 0;
+    padding: 12px;
+    background: #7a0000;
+    color: #fff;
+    text-align: center;
 }
 
-.card-features ul{
-    padding:15px 25px;
-    margin:0;
+.card-features ul {
+    padding: 15px 25px;
+    margin: 0;
 }
 
-.card-features li{
-    margin-bottom:6px;
+.card-features li {
+    margin-bottom: 6px;
 }
 
-/* زر التحميل */
-.download-btn{
-    margin-top:15px;
-    padding:12px 25px;
-    background:#7a0000;
-    color:#fff;
-    border-radius:10px;
-    text-decoration:none;
-    display:inline-block;
-    box-shadow:0 5px 15px rgba(0,0,0,.3);
-    cursor:pointer;
+/* زر تحميل */
+.download-btn {
+    margin-top: 15px;
+    padding: 12px 25px;
+    background: #7a0000;
+    color: #fff;
+    border-radius: 10px;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 5px 15px rgba(0,0,0,.3);
+    cursor: pointer;
 }
 
 /* موبايل */
 @media(max-width:650px){
-    .user-card{
-        flex-direction:column;
-        text-align:center;
+    .user-card {
+        flex-direction: column;
+        text-align: center;
     }
 }
 </style>
@@ -177,13 +183,14 @@ body{
 
         <div class="profile-column">
             <div class="profile-box">
-                <img src="{{ user.photo_url }}">
+                <img src="{{ user.photo_url }}" alt="صورة المستخدم">
             </div>
 
             <div class="identity-logo"></div>
 
             <div class="qr-box">
-                <img src="data:image/png;base64,{{ qr_code }}">
+                <!-- QR Code يظهر بشكل صحيح -->
+                <img src="{{ qr_code }}" alt="QR Code">
             </div>
         </div>
 
@@ -192,7 +199,7 @@ body{
             <p>اسم المستخدم: {{ user.username }}</p>
             <p>رقم العضوية: {{ user.card_number }}</p>
             <p>الهاتف: {{ user.phone or 'غير محدد' }}</p>
-            <p>الرقم الوطني: {{ user.national_id }}</p>
+            <p>الرقم الوطني: {{ user.national_id or 'غير محدد' }}</p>
             <p>تاريخ التسجيل: {{ registration_date }}</p>
             <p>الصلاحية: {{ expiry_date }}</p>
 
