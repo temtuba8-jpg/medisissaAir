@@ -119,7 +119,35 @@ h2{
     display:block;
 }
 
-/* الاسم + العلامة المائية */
+/* العلامة المائية */
+.player-card .watermark {
+    position: absolute;
+    top: 160px; /* يظهر فوق الاسم وجزء من الصورة */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    background: url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
+    background-size: contain;
+    opacity: 0.45;
+    animation: floatPulse 2.8s ease-in-out infinite;
+    z-index: 10;
+    pointer-events: none;
+}
+
+/* نبض خفيف */
+@keyframes floatPulse {
+    0%,100% {
+        transform: translateX(-50%) scale(1);
+        opacity: 0.45;
+    }
+    50% {
+        transform: translateX(-50%) scale(1.15);
+        opacity: 0.75;
+    }
+}
+
+/* الاسم */
 .player-name{
     position:relative;
     background:#800000;
@@ -128,33 +156,6 @@ h2{
     padding:36px 10px 12px; /* فراغ للشعار */
     font-weight:bold;
     overflow:hidden;
-}
-
-/* العلامة المائية المتوسطة بين الصورة والاسم */
-.player-card::after{
-    content:"";
-    position:absolute;
-    top:200px; /* منتصف البطاقة تقريبا */
-    left:50%;
-    transform:translateX(-50%);
-    width:54px;
-    height:54px;
-    background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
-    background-size:contain;
-    z-index:5;
-    animation:midPulse 2.6s ease-in-out infinite;
-}
-
-/* نبض خفيف للعلامة المائية */
-@keyframes midPulse{
-    0%,100%{
-        transform:translateX(-50%) scale(1);
-        opacity:.45;
-    }
-    50%{
-        transform:translateX(-50%) scale(1.15);
-        opacity:.75;
-    }
 }
 
 /* ================= فاصل ================= */
@@ -233,17 +234,61 @@ button{
 <h2>اللاعبين</h2>
 
 <div class="player-grid">
-<div class="player-card"><img src="{{ url_for('static', filename='images/1.png') }}"><div class="player-name">اللاعب الأول</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/2.png') }}"><div class="player-name">اللاعب الثاني</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/3.png') }}"><div class="player-name">اللاعب الثالث</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/4.png') }}"><div class="player-name">اللاعب الرابع</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/5.png') }}"><div class="player-name">اللاعب الخامس</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/6.png') }}"><div class="player-name">اللاعب السادس</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/7.png') }}"><div class="player-name">اللاعب السابع</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/8.png') }}"><div class="player-name">اللاعب الثامن</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/9.png') }}"><div class="player-name">اللاعب التاسع</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/10.png') }}"><div class="player-name">اللاعب العاشر</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/11.png') }}"><div class="player-name">اللاعب الحادي عشر</div></div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/1.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الأول</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/2.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الثاني</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/3.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الثالث</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/4.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الرابع</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/5.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الخامس</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/6.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب السادس</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/7.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب السابع</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/8.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الثامن</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/9.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب التاسع</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/10.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب العاشر</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/11.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">اللاعب الحادي عشر</div>
+</div>
 </div>
 
 <hr class="divider">
@@ -251,8 +296,16 @@ button{
 <h2>إدارة النادي</h2>
 
 <div class="player-grid">
-<div class="player-card"><img src="{{ url_for('static', filename='images/12.png') }}"><div class="player-name">رئيس النادي</div></div>
-<div class="player-card"><img src="{{ url_for('static', filename='images/13.png') }}"><div class="player-name">سكرتير الرئيس</div></div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/12.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">رئيس النادي</div>
+</div>
+<div class="player-card">
+    <img src="{{ url_for('static', filename='images/13.png') }}">
+    <div class="watermark"></div>
+    <div class="player-name">سكرتير الرئيس</div>
+</div>
 </div>
 </section>
 
