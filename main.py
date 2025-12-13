@@ -7,6 +7,7 @@ import base64
 import sys
 import traceback
 from datetime import datetime, timedelta
+from bson.objectid import ObjectId  # لإدارة _id في MongoDB
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
@@ -138,6 +139,8 @@ def logout_admin():
     return redirect(url_for("index"))
 
 # =====================
+# تعديل وحذف المستخدمين
+# =====================
 @app.route("/edit_user/<username>", methods=["GET", "POST"])
 def edit_user(username):
     if "is_admin" not in session:
@@ -173,6 +176,7 @@ def delete_user(username):
     flash("تم حذف المستخدم بنجاح")
     return redirect(url_for("admin"))
 
+# =====================
 # المستخدمين العاديين
 # =====================
 @app.route("/register", methods=["GET", "POST"])
@@ -316,6 +320,7 @@ def ticket(user_id):
     return render_template("ticket.html", user=user)
 
 #====================
+# إضافة اللاعبين
 @app.route("/add_player", methods=["GET", "POST"])
 def add_player():
     if "is_admin" not in session:
@@ -343,7 +348,43 @@ def add_player():
 
     return render_template("add_player.html")
 
-#==============
+@app.route("/edit_player/<player_id>", methods=["GET", "POST"])
+def edit_player(player_id):
+    if "is_admin" not in session:
+        flash("❌ يجب تسجيل الدخول كأدمن")
+        return redirect(url_for("index"))
+
+    db = get_db()
+    players_col = db.players
+    player = players_col.find_one({"_id": ObjectId(player_id)})
+
+    if not player:
+        flash("❌ اللاعب غير موجود")
+        return redirect(url_for("admin"))
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        position = request.form.get("position", "").strip()
+        players_col.update_one({"_id": ObjectId(player_id)}, {"$set": {"name": name, "position": position}})
+        flash("✅ تم تعديل اللاعب")
+        return redirect(url_for("admin"))
+
+    return render_template("edit_player.html", player=player)
+
+@app.route("/delete_player/<player_id>")
+def delete_player(player_id):
+    if "is_admin" not in session:
+        flash("❌ يجب تسجيل الدخول كأدمن")
+        return redirect(url_for("index"))
+
+    db = get_db()
+    players_col = db.players
+    players_col.delete_one({"_id": ObjectId(player_id)})
+    flash("✅ تم حذف اللاعب")
+    return redirect(url_for("admin"))
+
+#====================
+# إضافة الإعلانات
 @app.route("/add_ad", methods=["GET", "POST"])
 def add_ad():
     if "is_admin" not in session:
@@ -371,8 +412,43 @@ def add_ad():
 
     return render_template("add_ad.html")
 
+@app.route("/edit_ad/<ad_id>", methods=["GET", "POST"])
+def edit_ad(ad_id):
+    if "is_admin" not in session:
+        flash("❌ يجب تسجيل الدخول كأدمن")
+        return redirect(url_for("index"))
+
+    db = get_db()
+    ads_col = db.ads
+    ad = ads_col.find_one({"_id": ObjectId(ad_id)})
+
+    if not ad:
+        flash("❌ الإعلان غير موجود")
+        return redirect(url_for("admin"))
+
+    if request.method == "POST":
+        title = request.form.get("title", "").strip()
+        description = request.form.get("description", "").strip()
+        ads_col.update_one({"_id": ObjectId(ad_id)}, {"$set": {"title": title, "description": description}})
+        flash("✅ تم تعديل الإعلان")
+        return redirect(url_for("admin"))
+
+    return render_template("edit_ad.html", ad=ad)
+
+@app.route("/delete_ad/<ad_id>")
+def delete_ad(ad_id):
+    if "is_admin" not in session:
+        flash("❌ يجب تسجيل الدخول كأدمن")
+        return redirect(url_for("index"))
+
+    db = get_db()
+    ads_col = db.ads
+    ads_col.delete_one({"_id": ObjectId(ad_id)})
+    flash("✅ تم حذف الإعلان")
+    return redirect(url_for("admin"))
+
 #===========================
 # تشغيل السيرفر
-# =====================
+#============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
