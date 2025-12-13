@@ -8,146 +8,112 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
-body { 
-    font-family:'Cairo',sans-serif; 
-    background:#fff8f0; 
-    color:#330000; 
-    margin:0; 
-    padding:0; 
+body{
+    font-family:'Cairo',sans-serif;
+    background:#fff8f0;
+    color:#330000;
+    margin:0;
 }
 
-/* ================== الهيدر ================== */
-header { 
-    background:#8B0000; 
-    color:gold; 
-    display:flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 10px;
+/* ================= الهيدر ================= */
+header{
+    background:#8B0000;
+    color:gold;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
     padding:15px;
-    position: sticky;
+    position:sticky;
     top:0;
-    z-index: 1000;
+    z-index:1000;
 }
 
-header img.logo {
-    width: 100px;
-    animation: heartbeat 1s infinite;
+.logo{
+    width:100px;
+    animation:heartbeat 1s infinite;
 }
 
-@keyframes heartbeat {
-    0% { transform: scale(1); }
-    25% { transform: scale(1.15); }
-    50% { transform: scale(1); }
-    75% { transform: scale(1.15); }
-    100% { transform: scale(1); }
+@keyframes heartbeat{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.15)}
 }
 
-nav {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
+nav{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
 }
 
-nav a, .admin-btn { 
-    color:gold; 
-    text-decoration:none; 
-    font-weight:bold; 
-    padding:5px 10px;
-    border-radius:5px;
+nav a,.admin-btn{
+    color:gold;
+    font-weight:bold;
+    text-decoration:none;
+    padding:6px 12px;
+    border-radius:6px;
     cursor:pointer;
-    transition: 0.3s;
+    transition:.3s;
 }
 
-nav a:hover, .admin-btn:hover {
+nav a:hover,.admin-btn:hover{
     background:gold;
     color:#8B0000;
 }
 
-/* ================== شريط الأخبار (أبطأ) ================== */
-.news-bar {
-    width: 100%;
-    background: #800000;
-    overflow: hidden;
-    white-space: nowrap;
-    padding: 10px 0;
+/* ================= شريط الأخبار (أبطأ) ================= */
+.news-bar{
+    width:100%;
+    background:#800000;
+    overflow:hidden;
+    white-space:nowrap;
+    padding:10px 0;
 }
 
-.news-bar span {
-    display: inline-block;
-    padding-left: 100%;
-    animation: scrollNews 45s linear infinite;
-    color: gold;
-    font-weight: bold;
-}
-
-@keyframes scrollNews {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-}
-
-/* ================== المودال ================== */
-.modal-bg {
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.5);
-    justify-content:center;
-    align-items:center;
-    z-index:2000;
-}
-
-.modal-box {
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    width:300px;
-    text-align:center;
-    border:3px solid gold;
-}
-
-input {
-    width:90%;
-    padding:10px;
-    margin-top:10px;
-    border-radius:5px;
-    border:1px solid #ccc;
-}
-
-button {
-    background:gold; 
-    border:none; 
-    padding:10px 20px; 
-    border-radius:5px; 
-    cursor:pointer; 
-    margin-top:10px; 
+.news-bar span{
+    display:inline-block;
+    padding-left:100%;
+    animation:scrollNews 50s linear infinite;
+    color:gold;
     font-weight:bold;
 }
 
-/* ================== البطاقات ================== */
-.player-grid {
+@keyframes scrollNews{
+    from{transform:translateX(-100%)}
+    to{transform:translateX(100%)}
+}
+
+/* ================= البطاقات ================= */
+h2{
+    text-align:center;
+    color:#8B0000;
+    margin:30px 0 10px;
+}
+
+.player-grid{
     display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
     gap:20px;
     padding:20px;
-    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
 }
 
-.player-card {
-    position: relative;
+.player-card{
+    position:relative;
     background:#fff;
-    border-radius:15px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    border-radius:16px;
     overflow:hidden;
-    transition:0.3s;
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+    transition:.35s;
+    animation:fadeUp .8s ease forwards;
 }
 
-.player-card:hover {
-    transform: translateY(-6px);
+.player-card:hover{
+    transform:translateY(-10px) scale(1.03);
+    box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
 
-/* الشعار المائي */
-.player-card::before {
+/* شعار مائي */
+.player-card::before{
     content:"";
     position:absolute;
     top:10px;
@@ -156,44 +122,84 @@ button {
     height:70px;
     background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
     background-size:contain;
-    opacity:0.15;
-    z-index:1;
+    opacity:.15;
 }
 
-/* صورة البطاقة */
-.player-card img {
+/* صورة */
+.player-card img{
     width:100%;
     height:220px;
     object-fit:cover;
-    background:#fff;
+    transition:.5s;
 }
 
-/* اسم البطاقة */
-.player-name {
+.player-card:hover img{
+    transform:scale(1.08);
+}
+
+/* الاسم */
+.player-name{
     background:#800000;
     color:gold;
     text-align:center;
     padding:10px;
     font-weight:bold;
+    transition:.3s;
 }
 
-/* ================== العناوين ================== */
-h2 {
-    text-align:center;
-    color:#8B0000;
-    margin-top:25px;
+.player-card:hover .player-name{
+    background:#660000;
+    letter-spacing:1px;
 }
 
-/* ================== الفاصل ================== */
-.section-divider {
+/* دخول تدريجي */
+@keyframes fadeUp{
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* الفاصل */
+.divider{
     width:70%;
     margin:40px auto;
     border:2px solid #800000;
 }
 
-/* ================== استجابة ================== */
-@media(max-width:600px) {
-    header img.logo { width:70px; }
+/* ================= المودال ================= */
+.modal-bg{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.5);
+    justify-content:center;
+    align-items:center;
+    z-index:2000;
+}
+
+.modal-box{
+    background:#fff;
+    padding:20px;
+    border-radius:12px;
+    border:3px solid gold;
+    text-align:center;
+}
+
+input,button{
+    width:90%;
+    padding:10px;
+    margin-top:10px;
+}
+
+button{
+    background:gold;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* ================= استجابة ================= */
+@media(max-width:600px){
+    .logo{width:70px}
 }
 </style>
 </head>
@@ -206,7 +212,7 @@ h2 {
 
     <div class="news-bar">
         <span>
-        أخبار: استعداد إطلاق منصة نادي مديسيسة الرياضي قريبًا – بطاقة رقمية ذكية لكل عضو – خدمات رياضية وإدارية حديثة – تابعونا للمزيد من المفاجآت
+        قريبًا إطلاق المنصة الرقمية لنادي مديسيسة الرياضي – بطاقة رقمية ذكية – خدمات رياضية وإدارية متكاملة
         </span>
     </div>
 
@@ -221,45 +227,41 @@ h2 {
 <div class="modal-bg" id="adminModal">
     <div class="modal-box">
         <h3>دخول الإدارة</h3>
-        <form method="POST" action="/admin_verify">
-            <input type="password" name="password" placeholder="كلمة المرور">
-            <button type="submit">دخول</button>
-        </form>
+        <input type="password" placeholder="كلمة المرور">
+        <button>دخول</button>
         <button onclick="closeAdminModal()">إلغاء</button>
     </div>
 </div>
 
-<!-- ================== اللاعبين ================== -->
+<!-- ================= اللاعبين ================= -->
 <section>
 <h2>اللاعبين</h2>
 
 <div class="player-grid">
-    {% for i in range(1,12) %}
-    <div class="player-card">
-        <img src="{{ url_for('static', filename='images/' ~ i ~ '.png') }}">
-        <div class="player-name">لاعب {{ i }}</div>
-    </div>
-    {% endfor %}
+<div class="player-card"><img src="{{ url_for('static', filename='images/1.png') }}"><div class="player-name">اللاعب الأول</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/2.png') }}"><div class="player-name">اللاعب الثاني</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/3.png') }}"><div class="player-name">اللاعب الثالث</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/4.png') }}"><div class="player-name">اللاعب الرابع</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/5.png') }}"><div class="player-name">اللاعب الخامس</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/6.png') }}"><div class="player-name">اللاعب السادس</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/7.png') }}"><div class="player-name">اللاعب السابع</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/8.png') }}"><div class="player-name">اللاعب الثامن</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/9.png') }}"><div class="player-name">اللاعب التاسع</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/10.png') }}"><div class="player-name">اللاعب العاشر</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/11.png') }}"><div class="player-name">اللاعب الحادي عشر</div></div>
 </div>
 
-<hr class="section-divider">
+<hr class="divider">
 
 <h2>إدارة النادي</h2>
 
 <div class="player-grid">
-    <div class="player-card">
-        <img src="{{ url_for('static', filename='images/12.png') }}">
-        <div class="player-name">رئيس النادي</div>
-    </div>
-
-    <div class="player-card">
-        <img src="{{ url_for('static', filename='images/13.png') }}">
-        <div class="player-name">سكرتير الرئيس</div>
-    </div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/12.png') }}"><div class="player-name">رئيس النادي</div></div>
+<div class="player-card"><img src="{{ url_for('static', filename='images/13.png') }}"><div class="player-name">سكرتير الرئيس</div></div>
 </div>
 </section>
 
-<footer style="text-align:center;padding:15px;color:#800000;">
+<footer style="text-align:center;padding:15px;color:#800000">
 © نادي مديسيسة الرياضي
 </footer>
 
