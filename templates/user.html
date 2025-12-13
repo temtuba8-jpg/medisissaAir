@@ -29,14 +29,13 @@ body {
 /* البطاقة */
 .user-card {
     position:relative;
-    background:#800000; /* عنابي */
+    background:#800000;
     border-radius:20px;
     padding:20px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.3);
     display:flex;
-    align-items:center;
-    min-height:250px;
     overflow:hidden;
+    min-height:250px;
+    box-shadow:0 15px 30px rgba(0,0,0,0.3);
     animation: pulse 3s infinite;
     transition: transform 0.3s;
 }
@@ -45,19 +44,18 @@ body {
     transform: scale(1.02);
 }
 
-/* نبض خفيف */
 @keyframes pulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.005); }
+    0%,100% {transform: scale(1);}
+    50% {transform: scale(1.005);}
 }
 
-/* نقوش نوبية في الخلفية */
+/* نقوش نوبية على العنابي من الجهة اليسرى */
 .user-card::after {
     content:"";
     position:absolute;
     top:0;
     left:0;
-    width:100%;
+    width:40%;
     height:100%;
     background:url('static/images/nubian_pattern.png') repeat;
     opacity:0.05;
@@ -78,7 +76,7 @@ body {
     z-index:1;
 }
 
-/* شعار أعلى البطاقة على اليمين */
+/* شعار أعلى البطاقة */
 .logo-top {
     position:absolute;
     top:20px;
@@ -89,22 +87,41 @@ body {
     z-index:2;
 }
 
-/* صندوق صورة العضو */
-.profile-box {
+/* قسم صورة العضو الرقمي (يسار البطاقة) */
+.profile-strip {
+    position:relative;
     flex-shrink:0;
     width:120px;
-    height:120px;
-    border:3px solid gold;
-    border-radius:15px;
-    overflow:hidden;
+    height:100%;
+    background:linear-gradient(90deg, #c0c0c0 0%, #e0e0e0 100%);
+    border-radius:10px;
     margin-left:20px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    padding:10px;
     z-index:2;
+    overflow:hidden;
 }
 
-.profile-box img {
-    width:100%;
-    height:100%;
+.profile-strip img {
+    width:80px;
+    height:100px;
     object-fit:cover;
+    filter: grayscale(100%) brightness(0.9);
+    border:2px solid #fff;
+    border-radius:5px;
+    margin-bottom:10px;
+}
+
+/* أيقونة شريط الفيديو */
+.profile-strip::after {
+    content:"\1F4FD"; /* أيقونة كاميرا فيديو */
+    font-size:1.5em;
+    color:#fff;
+    position:absolute;
+    bottom:10px;
 }
 
 /* بيانات المستخدم */
@@ -113,6 +130,9 @@ body {
     text-align:right;
     z-index:2;
     flex:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
 
 .user-info h2 {
@@ -143,7 +163,7 @@ body {
     background:white;
     border-radius:15px;
     padding:15px;
-    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
     margin-top:15px;
 }
 
@@ -179,7 +199,7 @@ body {
 /* متجاوب */
 @media (max-width: 700px) {
     .user-card { flex-direction: column; align-items:center; min-height: auto; }
-    .profile-box { margin-left:0; margin-bottom:15px; }
+    .profile-strip { width:80%; margin-left:0; margin-bottom:15px; }
     .user-info { text-align:center; }
     .qr-box { text-align:center; }
 }
@@ -192,8 +212,8 @@ body {
         <!-- شعار أعلى البطاقة -->
         <div class="logo-top"></div>
 
-        <!-- صورة العضو -->
-        <div class="profile-box">
+        <!-- شريط صورة العضو الرقمي -->
+        <div class="profile-strip">
             <img src="{{ user.photo_url }}" alt="صورة العضو">
         </div>
 
@@ -216,7 +236,7 @@ body {
 </div>
 
 <!-- مميزات البطاقة -->
-<div class="card-features">
+<div class="card-features" id="features-section">
     <h3>مميزات البطاقة لحاملها:</h3>
     <ul>
         <li>الدخول المجاني إلى أنشطة النادي</li>
@@ -227,27 +247,33 @@ body {
     <a class="download-btn" href="#" onclick="downloadPDF()">تحميل البطاقة كـ PDF</a>
 </div>
 
+<!-- jsPDF + html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     var doc = new jsPDF({
         orientation: "landscape",
         unit: "px",
-        format: [600, 300]
+        format: [600, 600]
     });
+
     var card = document.querySelector('.user-card');
-    html2canvas(card).then(canvas => {
-        var imgData = canvas.toDataURL('image/png');
-        doc.addImage(imgData, 'PNG', 0, 0, 600, 300);
+    var features = document.getElementById('features-section');
+
+    Promise.all([
+        html2canvas(card),
+        html2canvas(features)
+    ]).then(([cardCanvas, featuresCanvas]) => {
+        var cardImg = cardCanvas.toDataURL('image/png');
+        var featuresImg = featuresCanvas.toDataURL('image/png');
+
+        doc.addImage(cardImg, 'PNG', 0, 0, 600, 300);
+        doc.addImage(featuresImg, 'PNG', 0, 310, 600, 290);
         doc.save('بطاقة_العضو.pdf');
     });
 }
-
-// تحميل البطاقة يحتاج مكتبة html2canvas
-var script = document.createElement('script');
-script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-document.head.appendChild(script);
 </script>
 
 </body>
