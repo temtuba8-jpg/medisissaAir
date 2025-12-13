@@ -321,13 +321,20 @@ def ticket(user_id):
 
 #====================
 # إضافة اللاعبين
+#====================
+# إضافة اللاعبين مع حماية كاملة وتشخيص الأخطاء
 @app.route("/add_player", methods=["GET", "POST"])
 def add_player():
-    if "is_admin" not in session:
+    # تحقق من صلاحية الأدمن
+    if not session.get("is_admin"):
         flash("❌ يجب تسجيل الدخول كأدمن")
         return redirect(url_for("index"))
 
     db = get_db()
+
+    # تحقق من وجود collection players
+    if "players" not in db.list_collection_names():
+        db.create_collection("players")
     players_col = db.players
 
     if request.method == "POST":
@@ -338,15 +345,30 @@ def add_player():
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("add_player"))
 
-        players_col.insert_one({
-            "name": name,
-            "position": position,
-            "added_date": datetime.now().strftime("%Y-%m-%d")
-        })
-        flash("✅ تم إضافة اللاعب بنجاح")
-        return redirect(url_for("admin"))
+        try:
+            players_col.insert_one({
+                "name": name,
+                "position": position,
+                "added_date": datetime.now().strftime("%Y-%m-%d")
+            })
+            flash("✅ تم إضافة اللاعب بنجاح")
+        except Exception as e:
+            # طباعة الخطأ في اللوج لتعرف السبب
+            print("❌ خطأ أثناء إضافة اللاعب:", e)
+            flash(f"❌ خطأ أثناء إضافة اللاعب: {e}")
 
-    return render_template("add_player.html")
+        return redirect(url_for("add_player"))
+
+    # GET request يعرض النموذج
+    try:
+        players_list = list(players_col.find())
+    except Exception as e:
+        print("❌ خطأ عند جلب اللاعبين:", e)
+        flash(f"❌ خطأ عند جلب قائمة اللاعبين: {e}")
+        players_list = []
+
+    return render_template("add_player.html", players=players_list)
+
 
 @app.route("/edit_player/<player_id>", methods=["GET", "POST"])
 def edit_player(player_id):
@@ -452,3 +474,4 @@ def delete_ad(ad_id):
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
