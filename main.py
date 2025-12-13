@@ -307,6 +307,15 @@ def user_page():
         flash("❌ الحساب غير موجود")
         return redirect(url_for("login"))
 
+    # ✅ التأكد من وجود verify_token لكل مستخدم
+    if "verify_token" not in user or not user["verify_token"]:
+        new_token = str(uuid.uuid4())
+        users_col.update_one(
+            {"_id": user["_id"]},
+            {"$set": {"verify_token": new_token}}
+        )
+        user["verify_token"] = new_token
+
     # 🔐 رابط التحقق الرسمي (عام)
     verify_url = f"{request.host_url}verify/{user['verify_token']}"
 
@@ -323,6 +332,7 @@ def user_page():
         expiry_date=expiry.strftime("%Y-%m-%d"),
         qr_code=qr_code
     )
+
 
 
 @app.route("/user_card/<int:card_number>")
@@ -512,5 +522,6 @@ def delete_ad(ad_id):
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
