@@ -7,27 +7,6 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 body { font-family:'Cairo',sans-serif; background:#fff8f0; color:#330000; margin:0; padding:0; }
-header { background:#8B0000; color:gold; padding:15px; text-align:center; }
-button { background:gold; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin:3px; font-weight:bold; }
-table { width:95%; margin:20px auto; border-collapse:collapse; }
-th, td { border:1px solid gold; padding:10px; text-align:center; }
-th { background:#8B0000; color:gold; }
-img { max-width:100px; height:auto; }
-h2 { text-align:center; margin-top:40px; }
-.add-btn { background:#008000; color:white; }
-@media(max-width:600px) { table, th, td { font-size:12px; } }
-</style>
-</head>
-<body>
-<header><!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>لوحة الأدمن - نادي مديسيسة</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
-body { font-family:'Cairo',sans-serif; background:#fff8f0; color:#330000; margin:0; padding:0; }
 header { background:#8B0000; color:gold; padding:15px; text-align:center; display:flex; flex-wrap:wrap; justify-content:center; gap:10px; }
 button { background:gold; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin:3px; font-weight:bold; }
 table { width:95%; margin:20px auto; border-collapse:collapse; }
@@ -86,10 +65,10 @@ h2 { text-align:center; margin-top:40px; }
 </td>
 <td>
 {% if p._id %}
-<a href="{{ url_for('edit_player', player_id=p._id) }}"><button>تعديل</button></a>
-<a href="{{ url_for('delete_player', player_id=p._id) }}" onclick="return confirm('هل تريد حذف اللاعب؟')"><button>حذف</button></a>
+<a href="{{ url_for('edit_player', player_id=p._id|string) }}"><button>تعديل</button></a>
+<a href="{{ url_for('delete_player', player_id=p._id|string) }}" onclick="return confirm('هل تريد حذف اللاعب؟')"><button>حذف</button></a>
 {% else %}
-- 
+-
 {% endif %}
 </td>
 </tr>
@@ -108,10 +87,10 @@ h2 { text-align:center; margin-top:40px; }
 </td>
 <td>
 {% if a._id %}
-<a href="{{ url_for('edit_ad', ad_id=a._id) }}"><button>تعديل</button></a>
-<a href="{{ url_for('delete_ad', ad_id=a._id) }}" onclick="return confirm('هل تريد حذف الإعلان؟')"><button>حذف</button></a>
+<a href="{{ url_for('edit_ad', ad_id=a._id|string) }}"><button>تعديل</button></a>
+<a href="{{ url_for('delete_ad', ad_id=a._id|string) }}" onclick="return confirm('هل تريد حذف الإعلان؟')"><button>حذف</button></a>
 {% else %}
-- 
+-
 {% endif %}
 </td>
 </tr>
@@ -120,81 +99,3 @@ h2 { text-align:center; margin-top:40px; }
 
 </body>
 </html>
-
-<h1>لوحة الأدمن</h1>
-<a href="{{ url_for('index') }}"><button>العودة للرئيسية</button></a>
-<a href="{{ url_for('logout') }}"><button>تسجيل الخروج</button></a>
-</header>
-
-<!-- قسم المستخدمين -->
-<h2>المستخدمين <a href="{{ url_for('register') }}"><button class="add-btn">إضافة مستخدم جديد</button></a></h2>
-<table>
-<tr>
-<th>الاسم</th><th>اسم المستخدم</th><th>العنوان</th><th>الهاتف</th><th>الرقم الوطني</th><th>الدور</th><th>الصورة</th><th>الإجراءات</th>
-</tr>
-{% for u in users %}
-<tr>
-<td>{{ u.full_name }}</td>
-<td>{{ u.username }}</td>
-<td>{{ u.address }}</td>
-<td>{{ u.phone }}</td>
-<td>{{ u.national_id }}</td>
-<td>{{ u.role }}</td>
-<td>
-{% if u.photo_url %}
-<img src="{{ u.photo_url }}">
-{% else %}-{% endif %}
-</td>
-<td>
-<a href="{{ url_for('edit_user', username=u.username) }}"><button>تعديل كلمة المرور</button></a>
-<a href="{{ url_for('delete_user', username=u.username) }}" onclick="return confirm('هل أنت متأكد من حذف المستخدم؟')"><button>حذف</button></a>
-<a href="{{ url_for('ticket', user_id=u.username) }}"><button>إنشاء بطاقة حجز</button></a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-<!-- قسم اللاعبين -->
-<h2>اللاعبين <a href="{{ url_for('add_player') }}"><button class="add-btn">إضافة لاعب جديد</button></a></h2>
-<table>
-<tr><th>الاسم</th><th>المركز</th><th>الصورة</th><th>الإجراءات</th></tr>
-{% for p in players %}
-<tr>
-<td>{{ p.name }}</td>
-<td>{{ p.position }}</td>
-<td>
-{% if p.photo_url %}
-<img src="{{ p.photo_url }}">
-{% else %}-{% endif %}
-</td>
-<td>
-<a href="{{ url_for('edit_player', player_id=p._id) }}"><button>تعديل</button></a>
-<a href="{{ url_for('delete_player', player_id=p._id) }}" onclick="return confirm('هل تريد حذف اللاعب؟')"><button>حذف</button></a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-<!-- قسم الإعلانات -->
-<h2>الإعلانات <a href="{{ url_for('add_ad') }}"><button class="add-btn">إضافة إعلان جديد</button></a></h2>
-<table>
-<tr><th>العنوان</th><th>الصورة</th><th>الإجراءات</th></tr>
-{% for a in ads %}
-<tr>
-<td>{{ a.title }}</td>
-<td>
-{% if a.photo_url %}
-<img src="{{ a.photo_url }}">
-{% else %}-{% endif %}
-</td>
-<td>
-<a href="{{ url_for('edit_ad', ad_id=a._id) }}"><button>تعديل</button></a>
-<a href="{{ url_for('delete_ad', ad_id=a._id) }}" onclick="return confirm('هل تريد حذف الإعلان؟')"><button>حذف</button></a>
-</td>
-</tr>
-{% endfor %}
-</table>
-
-</body>
-</html>
-
