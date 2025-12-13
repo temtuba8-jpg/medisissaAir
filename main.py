@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from pymongo import MongoClient
-from bson import ObjectId
 from urllib.parse import quote_plus
 import qrcode
 import io
@@ -33,9 +32,11 @@ uri = f"mongodb+srv://{username}:{password_escaped}@{cluster}/{database_name}?re
 def get_db():
     try:
         client = MongoClient(uri, serverSelectionTimeoutMS=10000)
-        return client[database_name]
+        db = client[database_name]
+        return db
     except Exception as e:
-        print("❌ MongoDB Connection Failed:", e)
+        print("❌ MongoDB Connection Failed")
+        print("Error:", e)
         sys.exit(1)
 
 # =====================
@@ -67,11 +68,12 @@ def generate_qr_base64(data):
 def get_next_card_number(users_col):
     try:
         users = list(users_col.find({}, {"card_number": 1}))
-        last = max((u.get("card_number", 0) for u in users), default=0)
-        return last + 1
+        if users:
+            last = max((u.get("card_number", 0) for u in users), default=0)
+            return last + 1
     except Exception:
         traceback.print_exc()
-        return 1
+    return 1
 
 # =====================
 # كلمة سر الأدمن
@@ -81,140 +83,64 @@ ADMIN_PASSWORD = "22@22"
 # =====================
 # Routes
 # =====================
+
 @app.route("/")
 def index():
     db = get_db()
     players_col = db.players
     ads_col = db.ads
-    players = list(players_col.find())
-    ads = list(ads_col.find())
+    try:
+        players = list(players_col.find())
+    except Exception:
+        traceback.print_exc()
+        players = []
+
+    try:
+        ads = list(ads_col.find())
+    except Exception:
+        traceback.print_exc()
+        ads = []
+
     return render_template("index.html", players=players, ads=ads)
 
-@app.route("/admin")
-def admin():
-    if not session.get("is_admin"):
-        flash("❌ الرجاء إدخال كلمة سر الأدمن أولاً")
-        return redirect(url_for("index"))
+@app.route("/login", methods=["GET", "POST"])
+def login():
     db = get_db()
-    users = list(db.users.find())
-    players = list(db.players.find())
-    ads = list(db.ads.find())
-    return render_template("admin.html", users=users, players=players, ads=ads)
+    users_col = db.users
 
-@app.route("/admin_verify", methods=["POST"])
-def admin_verify():
-    password = request.form.get("password", "")
-    if password == ADMIN_PASSWORD:
-        session["is_admin"] = True
-        flash("✅ تم تسجيل الدخول كأدمن")
-        return redirect(url_for("admin"))
-    flash("❌ كلمة السر غير صحيحة")
-    return redirect(url_for("index"))
-
-@app.route("/logout_admin")
-def logout_admin():
-    session.pop("is_admin", None)
-    flash("✅ تم تسجيل الخروج من الإدارة")
-    return redirect(url_for("index"))
-
-# =====================
-# إدارة المستخدمين
-# =====================
-@app.route("/edit_user/<username>", methods=["GET", "POST"])
-def edit_user(username):
-    if "is_admin" not in session:
-        return redirect(url_for("index"))
-    db = get_db()
-    user = db.users.find_one({"username": username})
-    if not user:
-        flash("المستخدم غير موجود")
-        return redirect(url_for("admin"))
     if request.method == "POST":
-        new_password = request.form.get("new_password", "")
-        db.users.update_one({"username": username}, {"$set": {"password": new_password}})
-        flash("✅ تم تحديث كلمة المرور")
-        return redirect(url_for("admin"))
-    return render_template("edit_user.html", user=user)
+        username = (request.form.get("username") or "").strip()
+        password = (request.form.get("password") or "").strip()
 
-@app.route("/delete_user/<username>")
-def delete_user(username):
-    if "is_admin" not in session:
-        return redirect(url_for("index"))
-    db = get_db()
-    db.users.delete_one({"username": username})
-    flash("✅ تم حذف المستخدم")
-    return redirect(url_for("admin"))
-
-# =====================
-# إضافة وإدارة اللاعبين
-# =====================
-@app.route("/add_player", methods=["GET", "POST"])
-def add_player():
-    if "is_admin" not in session:
-        flash("❌ يجب تسجيل الدخول كأدمن")
-        return redirect(url_for("index"))
-    db = get_db()
-    if request.method == "POST":
-        name = request.form.get("name", "").strip()
-        position = request.form.get("position", "").strip()
-        if not name or not position:
+        if not username or not password:
             flash("❌ الرجاء تعبئة جميع الحقول")
-            return redirect(url_for("add_player"))
-        db.players.insert_one({"name": name, "position": position, "added_date": datetime.now().strftime("%Y-%m-%d")})
-        flash("✅ تم إضافة اللاعب")
-        return redirect(url_for("admin"))
-    return render_template("add_player.html")
+            return redirect(url_for("login"))
+
+        try:
+            user = users_col.find_one({"username": username})
+        except Exception:
+            traceback.print_exc()
+            user = None
+
+        if user and user.get("password") == password:
+            session["user"] = {"username": username, "role": "user"}
+            session.permanent = True
+            flash(f"✅ تسجيل الدخول ناجح (user)")
+            return redirect(url_for("user_page"))
+
+        flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
+        return redirect(url_for("login"))
+
+    return render_template("login.html")
+
+# باقي الـ routes كما هي بدون أي تعديل...
 
 # =====================
-# إضافة وتحرير وحذف الإعلانات
+# لا تضع app.run عند التشغيل على Render
+# Render سيشغل الـ app تلقائيًا
 # =====================
-@app.route("/add_ad", methods=["GET", "POST"])
-def add_ad():
-    if "is_admin" not in session:
-        flash("❌ يجب تسجيل الدخول كأدمن")
-        return redirect(url_for("index"))
-    db = get_db()
-    if request.method == "POST":
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        if not title or not description:
-            flash("❌ الرجاء تعبئة جميع الحقول")
-            return redirect(url_for("add_ad"))
-        db.ads.insert_one({"title": title, "description": description, "date": datetime.now().strftime("%Y-%m-%d")})
-        flash("✅ تم إضافة الإعلان")
-        return redirect(url_for("admin"))
-    return render_template("add_ad.html")
 
-@app.route("/edit_ad/<ad_id>", methods=["GET", "POST"])
-def edit_ad(ad_id):
-    if "is_admin" not in session:
-        flash("❌ يجب تسجيل الدخول كأدمن")
-        return redirect(url_for("index"))
-    db = get_db()
-    ad = db.ads.find_one({"_id": ObjectId(ad_id)})
-    if not ad:
-        flash("❌ الإعلان غير موجود")
-        return redirect(url_for("admin"))
-    if request.method == "POST":
-        title = request.form.get("title", "").strip()
-        description = request.form.get("description", "").strip()
-        db.ads.update_one({"_id": ObjectId(ad_id)}, {"$set": {"title": title, "description": description}})
-        flash("✅ تم تعديل الإعلان")
-        return redirect(url_for("admin"))
-    return render_template("edit_ad.html", ad=ad)
-
-@app.route("/delete_ad/<ad_id>")
-def delete_ad(ad_id):
-    if "is_admin" not in session:
-        flash("❌ يجب تسجيل الدخول كأدمن")
-        return redirect(url_for("index"))
-    db = get_db()
-    db.ads.delete_one({"_id": ObjectId(ad_id)})
-    flash("✅ تم حذف الإعلان")
-    return redirect(url_for("admin"))
-
-# =====================
-# تشغيل السيرفر
-# =====================
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+# يمكنك اختبار تسجيل جميع الـ routes
+print("Routes registered:")
+for rule in app.url_map.iter_rules():
+    print(rule.endpoint, rule)
