@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from pymongo import MongoClient
 from urllib.parse import quote_plus
+import uuid
 import qrcode
 import io
 import base64
@@ -177,31 +178,35 @@ def delete_user(username):
     return redirect(url_for("admin"))
 
 # =====================
-# المستخدمين العاديين
+# =====================
+# المستخدمين العاديين (Register)
 # =====================
 @app.route("/register", methods=["GET", "POST"])
 def register():
     db = get_db()
     users_col = db.users
+
     if request.method == "POST":
         username = (request.form.get("username") or "").strip()
         password = (request.form.get("password") or "").strip()
-        full_name = request.form.get("full_name")
-        phone = request.form.get("phone")
-        address = request.form.get("address")
-        national_id = request.form.get("national_id")
+        full_name = (request.form.get("full_name") or "").strip()
+        phone = (request.form.get("phone") or "").strip()
+        address = (request.form.get("address") or "").strip()
+        national_id = (request.form.get("national_id") or "").strip()
 
         if not username or not password:
             flash("❌ الرجاء تعبئة جميع الحقول")
             return redirect(url_for("register"))
 
         if users_col.find_one({"username": username}):
-            flash("❌ اسم المستخدم موجود")
+            flash("❌ اسم المستخدم موجود مسبقاً")
             return redirect(url_for("register"))
 
+        # حفظ الصورة
         photo_file = request.files.get("photo")
         photo_url = save_photo_to_db(photo_file) if photo_file else ""
 
+        # إنشاء المستخدم مع رمز تحقق فريد
         new_user = {
             "username": username,
             "password": password,
@@ -212,6 +217,8 @@ def register():
             "photo_url": photo_url,
             "role": "user",
             "card_number": get_next_card_number(users_col),
+            "verify_token": str(__import__("uuid").uuid4()),
+            "active": True,
             "registration_date": datetime.now().strftime("%Y-%m-%d")
         }
 
@@ -225,6 +232,31 @@ def register():
             return redirect(url_for("register"))
 
     return render_template("register.html")
+#==================
+@app.route("/verify/<token>")
+def verify_card(token):
+    db = get_db()
+    users_col = db.users
+
+    user = users_col.find_one({
+        "verify_token": token,
+        "active": True
+    })
+
+    if not user:
+        return render_template("verify_invalid.html")
+
+    expiry = datetime.strptime(
+        user["registration_date"], "%Y-%m-%d"
+    ) + timedelta(days=180)
+
+    return render_template(
+        "verify_valid.html",
+        user=user,
+        expiry_date=expiry.strftime("%Y-%m-%d")
+    )
+
+#================
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -254,7 +286,6 @@ def login():
         return redirect(url_for("login"))
 
     return render_template("login.html")
-
 @app.route("/user")
 def user_page():
     user_session = session.get("user")
@@ -264,6 +295,7 @@ def user_page():
 
     db = get_db()
     users_col = db.users
+
     try:
         user = users_col.find_one({"username": user_session["username"]})
     except Exception:
@@ -275,8 +307,13 @@ def user_page():
         flash("❌ الحساب غير موجود")
         return redirect(url_for("login"))
 
-    qr_url = f"{request.host_url}user_card/{user['card_number']}"
-    qr_code = generate_qr_base64(qr_url)
+    # 🔐 رابط التحقق الرسمي (عام)
+    verify_url = f"{request.host_url}verify/{user['verify_token']}"
+
+    # توليد QR
+    qr_code = generate_qr_base64(verify_url)
+
+    # الصلاحية 6 شهور
     expiry = datetime.strptime(user["registration_date"], "%Y-%m-%d") + timedelta(days=180)
 
     return render_template(
@@ -286,6 +323,7 @@ def user_page():
         expiry_date=expiry.strftime("%Y-%m-%d"),
         qr_code=qr_code
     )
+
 
 @app.route("/user_card/<int:card_number>")
 def user_card(card_number):
@@ -474,4 +512,5 @@ def delete_ad(ad_id):
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
