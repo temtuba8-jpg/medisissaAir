@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>نادي مديسيسة الرياضي</title>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
 
@@ -15,7 +16,7 @@ body {
     padding:0; 
 }
 
-/* الهيدر ثابت في الأعلى */
+/* ================== الهيدر ================== */
 header { 
     background:#8B0000; 
     color:gold; 
@@ -29,7 +30,6 @@ header {
     z-index: 1000;
 }
 
-/* الشعار ثابت داخل الهيدر */
 header img.logo {
     width: 100px;
     animation: heartbeat 1s infinite;
@@ -37,9 +37,9 @@ header img.logo {
 
 @keyframes heartbeat {
     0% { transform: scale(1); }
-    25% { transform: scale(1.2); }
+    25% { transform: scale(1.15); }
     50% { transform: scale(1); }
-    75% { transform: scale(1.2); }
+    75% { transform: scale(1.15); }
     100% { transform: scale(1); }
 }
 
@@ -57,7 +57,7 @@ nav a, .admin-btn {
     padding:5px 10px;
     border-radius:5px;
     cursor:pointer;
-    transition: background 0.3s;
+    transition: 0.3s;
 }
 
 nav a:hover, .admin-btn:hover {
@@ -65,20 +65,19 @@ nav a:hover, .admin-btn:hover {
     color:#8B0000;
 }
 
-/* شريط الأخبار */
+/* ================== شريط الأخبار (أبطأ) ================== */
 .news-bar {
     width: 100%;
-    background: #800000; /* عنابي */
+    background: #800000;
     overflow: hidden;
     white-space: nowrap;
-    box-sizing: border-box;
     padding: 10px 0;
 }
 
 .news-bar span {
     display: inline-block;
     padding-left: 100%;
-    animation: scrollNews 15s linear infinite;
+    animation: scrollNews 45s linear infinite;
     color: gold;
     font-weight: bold;
 }
@@ -88,16 +87,15 @@ nav a:hover, .admin-btn:hover {
     100% { transform: translateX(100%); }
 }
 
-/* المودال */
+/* ================== المودال ================== */
 .modal-bg {
     display:none;
     position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
+    inset:0;
     background:rgba(0,0,0,0.5);
     justify-content:center;
     align-items:center;
-    z-index: 2000;
+    z-index:2000;
 }
 
 .modal-box {
@@ -127,72 +125,91 @@ button {
     font-weight:bold;
 }
 
-.player-grid, .ad-grid { 
-    display:grid; 
-    gap:15px; 
-    padding:20px; 
-    grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); 
+/* ================== البطاقات ================== */
+.player-grid {
+    display:grid;
+    gap:20px;
+    padding:20px;
+    grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
 }
 
-.player-card, .ad-card { 
-    border:2px solid gold; 
-    border-radius:12px; 
-    padding:10px; 
-    text-align:center; 
-    background:#fffbe6; 
-    transition: transform 0.3s; 
+.player-card {
+    position: relative;
+    background:#fff;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+    overflow:hidden;
+    transition:0.3s;
 }
 
-.player-card:hover, .ad-card:hover { 
-    transform: scale(1.05); 
+.player-card:hover {
+    transform: translateY(-6px);
 }
 
-.player-card img, .ad-card img { 
-    width:100%; 
-    border-radius:10px; 
-    height: auto;
+/* الشعار المائي */
+.player-card::before {
+    content:"";
+    position:absolute;
+    top:10px;
+    left:10px;
+    width:70px;
+    height:70px;
+    background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
+    background-size:contain;
+    opacity:0.15;
+    z-index:1;
 }
 
-h2 { 
-    color:#8B0000; 
-    text-align:center; 
-    margin-top:20px; 
+/* صورة البطاقة */
+.player-card img {
+    width:100%;
+    height:220px;
+    object-fit:cover;
+    background:#fff;
 }
 
-@media(max-width:900px) {
-    header img.logo { width: 80px; }
-    .player-grid, .ad-grid { grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); padding:15px; }
+/* اسم البطاقة */
+.player-name {
+    background:#800000;
+    color:gold;
+    text-align:center;
+    padding:10px;
+    font-weight:bold;
 }
 
+/* ================== العناوين ================== */
+h2 {
+    text-align:center;
+    color:#8B0000;
+    margin-top:25px;
+}
+
+/* ================== الفاصل ================== */
+.section-divider {
+    width:70%;
+    margin:40px auto;
+    border:2px solid #800000;
+}
+
+/* ================== استجابة ================== */
 @media(max-width:600px) {
-    header img.logo { width: 60px; }
-    nav { flex-direction: column; gap: 10px; }
-    .player-grid, .ad-grid { grid-template-columns: 1fr; padding:10px; }
-    h2 { font-size: 1.3em; }
-}
-
-@media(max-width:400px) {
-    header img.logo { width: 50px; }
-    h1 { font-size: 1.2em; }
-    nav a { font-size: 0.9em; padding:5px 8px; }
+    header img.logo { width:70px; }
 }
 </style>
 </head>
+
 <body>
 
 <header>
-    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="شعار النادي" class="logo">
+    <img src="{{ url_for('static', filename='images/logo.png') }}" class="logo">
     <h1>نادي مديسيسة الرياضي</h1>
-    <!-- شريط الأخبار -->
+
     <div class="news-bar">
-        <span>أخبار: استعداد إطلاق منصة نادي مديسيسة الرياضي قريبًا!
-تستعد إدارة نادي مديسيسة لإطلاق منصتها الرقمية الجديدة، التي ستقدم خدمات مبتكرة ومتكاملة لأهالي المنطقة وأعضاء النادي. هذه المنصة تهدف إلى تسهيل الوصول لجميع الأنشطة والخدمات الخاصة بالنادي، بالإضافة إلى تقديم تجربة رقمية متقدمة لكل مستخدم.
-
-عند تسجيل أي مستخدم في الموقع، سيحصل على بطاقة رقمية ذكية تمثل عضويته، مع إمكانية الاستفادة من جميع المزايا التي ستضيفها إدارة النادي لاحقًا، بما في ذلك متابعة الأنشطة الرياضية، الاطلاع على الأخبار والتحديثات، وحجز المرافق والخدمات الخاصة بالنادي مباشرة من المنصة.
-
-وعدت إدارة النادي بأن تكون هذه المنصة مركزًا رقميًا حديثًا يربط بين جميع أفراد النادي وأهالي المنطقة، مع توفير تجربة سلسة وآمنة، وتحفيز المستخدمين على المشاركة في فعاليات النادي المختلفة.
-ابقوا معنا لاكتشاف المزيد من الخدمات الحصرية التي ستتم إضافتها قريبًا!</span>
+        <span>
+        أخبار: استعداد إطلاق منصة نادي مديسيسة الرياضي قريبًا – بطاقة رقمية ذكية لكل عضو – خدمات رياضية وإدارية حديثة – تابعونا للمزيد من المفاجآت
+        </span>
     </div>
+
     <nav>
         <a href="{{ url_for('index') }}">الرئيسية</a>
         <a href="{{ url_for('login') }}">تسجيل الدخول</a>
@@ -200,56 +217,60 @@ h2 {
     </nav>
 </header>
 
+<!-- مودال الإدارة -->
 <div class="modal-bg" id="adminModal">
     <div class="modal-box">
         <h3>دخول الإدارة</h3>
-        <form id="adminForm" method="POST" action="/admin_verify">
-            <input type="password" name="password" id="adminPass" placeholder="أدخل كلمة المرور">
+        <form method="POST" action="/admin_verify">
+            <input type="password" name="password" placeholder="كلمة المرور">
             <button type="submit">دخول</button>
         </form>
         <button onclick="closeAdminModal()">إلغاء</button>
     </div>
 </div>
 
+<!-- ================== اللاعبين ================== -->
 <section>
 <h2>اللاعبين</h2>
+
 <div class="player-grid">
-    {% for p in players %}
+    {% for i in range(1,12) %}
     <div class="player-card">
-        <img src="{{ p.photo_url or url_for('static', filename='images/default_player.png') }}" alt="{{ p.name }}">
-        <h3>{{ p.name }}</h3>
-        <p>{{ p.position }}</p>
+        <img src="{{ url_for('static', filename='images/' ~ i ~ '.png') }}">
+        <div class="player-name">لاعب {{ i }}</div>
     </div>
     {% endfor %}
 </div>
-</section>
 
-<section>
-<h2>الإعلانات</h2>
-<div class="ad-grid">
-    {% for a in ads %}
-    <div class="ad-card">
-        <img src="{{ a.photo_url or url_for('static', filename='images/default_ad.png') }}" alt="{{ a.title }}">
-        <p>{{ a.title }}</p>
+<hr class="section-divider">
+
+<h2>إدارة النادي</h2>
+
+<div class="player-grid">
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/12.png') }}">
+        <div class="player-name">رئيس النادي</div>
     </div>
-    {% endfor %}
+
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/13.png') }}">
+        <div class="player-name">سكرتير الرئيس</div>
+    </div>
 </div>
 </section>
 
-<footer>
-<p>حقوق النشر © نادي مديسيسة الرياضي</p>
+<footer style="text-align:center;padding:15px;color:#800000;">
+© نادي مديسيسة الرياضي
 </footer>
 
 <script>
-function openAdminModal() {
-    document.getElementById("adminModal").style.display = "flex";
+function openAdminModal(){
+    document.getElementById("adminModal").style.display="flex";
 }
-function closeAdminModal() {
-    document.getElementById("adminModal").style.display = "none";
+function closeAdminModal(){
+    document.getElementById("adminModal").style.display="none";
 }
 </script>
 
 </body>
 </html>
-
-
