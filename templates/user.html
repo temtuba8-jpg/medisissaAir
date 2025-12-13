@@ -46,7 +46,7 @@ body{
     z-index:0;
 }
 
-/* شعار كبير شفاف */
+/* شعار مائي كبير */
 .user-card::before{
     content:"";
     position:absolute;
@@ -153,7 +153,6 @@ body{
     overflow:hidden;
 }
 
-/* عنوان المميزات */
 .card-features h3{
     margin:0;
     padding:12px;
@@ -162,7 +161,6 @@ body{
     text-align:center;
 }
 
-/* محتوى المميزات */
 .card-features ul{
     padding:15px 25px;
     margin:0;
@@ -182,6 +180,7 @@ body{
     text-decoration:none;
     display:inline-block;
     box-shadow:0 5px 15px rgba(0,0,0,.3);
+    cursor:pointer;
 }
 
 /* موبايل */
@@ -189,33 +188,30 @@ body{
     .user-card{
         flex-direction:column;
         align-items:center;
+        text-align:center;
     }
-    .user-info{text-align:center}
+    .profile-strip{display:none}
 }
 </style>
 </head>
 
 <body>
 
-<div class="card-container">
+<div class="card-container" id="cardArea">
     <div class="user-card">
 
         <div class="logo-top"></div>
 
-        <!-- عمود الصورة -->
         <div class="profile-column">
             <div class="profile-box">
                 <img src="{{ user.photo_url }}">
             </div>
-
             <div class="small-logo"></div>
-
             <div class="qr-box">
                 <img src="data:image/png;base64,{{ qr_code }}">
             </div>
         </div>
 
-        <!-- البيانات -->
         <div class="user-info">
             <h2>{{ user.full_name }}</h2>
             <p>اسم المستخدم: {{ user.username }}</p>
@@ -226,7 +222,6 @@ body{
             <p>الصلاحية: {{ expiry_date }}</p>
         </div>
 
-        <!-- العلامة المائية -->
         <div class="profile-strip">
             {% for i in range(5) %}
             <img src="{{ user.photo_url }}">
@@ -247,6 +242,33 @@ body{
 </div>
 
 <a class="download-btn" onclick="downloadPDF()">تحميل البطاقة PDF</a>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+async function downloadPDF(){
+    const { jsPDF } = window.jspdf;
+    const card = document.getElementById('cardArea');
+    const rect = card.getBoundingClientRect();
+
+    const canvas = await html2canvas(card,{
+        scale:3,
+        useCORS:true
+    });
+
+    const imgData = canvas.toDataURL('image/png',1.0);
+
+    const pdf = new jsPDF({
+        orientation: rect.width > rect.height ? 'landscape' : 'portrait',
+        unit:'px',
+        format:[rect.width, rect.height]
+    });
+
+    pdf.addImage(imgData,'PNG',0,0,rect.width,rect.height);
+    pdf.save('بطاقة_العضو.pdf');
+}
+</script>
 
 </body>
 </html>
