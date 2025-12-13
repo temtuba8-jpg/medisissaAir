@@ -9,7 +9,7 @@
 
 body {
     font-family:'Cairo',sans-serif;
-    background:#faf3e0;
+    background:#f2f0ec;
     margin:0;
     padding:20px;
     display:flex;
@@ -20,108 +20,79 @@ body {
 }
 
 /* الحاوية */
-.card-container {
-    max-width:600px;
-    width:100%;
-    margin-bottom:20px;
-}
+.card-container { max-width:600px; width:100%; margin-bottom:20px; }
 
 /* البطاقة */
 .user-card {
     position:relative;
-    background:#800000;
+    background: linear-gradient(145deg, #800000, #a00000);
     border-radius:20px;
     padding:20px;
     display:flex;
-    overflow:hidden;
+    align-items:flex-start;
     min-height:250px;
-    box-shadow:0 15px 30px rgba(0,0,0,0.3);
-    animation: pulse 3s infinite;
-    transition: transform 0.3s;
+    overflow:hidden;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.4);
+    transition: transform 0.3s, box-shadow 0.3s;
 }
 
 .user-card:hover {
     transform: scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
 }
 
+/* نبض خفيف */
 @keyframes pulse {
-    0%,100% {transform: scale(1);}
-    50% {transform: scale(1.005);}
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.005); }
 }
 
-/* نقوش نوبية على العنابي من الجهة اليسرى */
+/* نقوش نوبية في الخلفية */
 .user-card::after {
     content:"";
     position:absolute;
-    top:0;
-    left:0;
-    width:40%;
-    height:100%;
+    top:0; left:0;
+    width:100%; height:100%;
     background:url('static/images/nubian_pattern.png') repeat;
     opacity:0.05;
     z-index:0;
 }
 
-/* شعار شفاف في المنتصف */
+/* شعار شفاف في منتصف البطاقة */
 .user-card::before {
     content:"";
     position:absolute;
-    top:50%;
-    left:50%;
+    top:50%; left:50%;
     transform:translate(-50%, -50%);
-    width:200px;
-    height:200px;
+    width:200px; height:200px;
     background:url('static/images/logo.png') no-repeat center/contain;
     opacity:0.1;
     z-index:1;
 }
 
-/* شعار أعلى البطاقة */
+/* شعار أعلى البطاقة على اليمين */
 .logo-top {
     position:absolute;
-    top:20px;
-    right:20px;
-    width:80px;
-    height:80px;
+    top:20px; right:20px;
+    width:80px; height:80px;
     background:url('static/images/logo.png') no-repeat center/contain;
     z-index:2;
 }
 
-/* قسم صورة العضو الرقمي (يسار البطاقة) */
-.profile-strip {
-    position:relative;
+/* صندوق صورة العضو */
+.profile-box {
     flex-shrink:0;
-    width:120px;
-    height:100%;
-    background:linear-gradient(90deg, #c0c0c0 0%, #e0e0e0 100%);
-    border-radius:10px;
-    margin-left:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    padding:10px;
-    z-index:2;
+    width:120px; height:120px;
+    border:3px solid gold;
+    border-radius:15px;
     overflow:hidden;
+    margin-left:20px;
+    z-index:2;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-.profile-strip img {
-    width:80px;
-    height:100px;
-    object-fit:cover;
-    filter: grayscale(100%) brightness(0.9);
-    border:2px solid #fff;
-    border-radius:5px;
-    margin-bottom:10px;
-}
-
-/* أيقونة شريط الفيديو */
-.profile-strip::after {
-    content:"\1F4FD"; /* أيقونة كاميرا فيديو */
-    font-size:1.5em;
-    color:#fff;
-    position:absolute;
-    bottom:10px;
+.profile-box img {
+    width:100%; height:100%; object-fit:cover;
 }
 
 /* بيانات المستخدم */
@@ -130,32 +101,37 @@ body {
     text-align:right;
     z-index:2;
     flex:1;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
 }
 
-.user-info h2 {
-    margin:0 0 10px 0;
-    font-size:1.4em;
-}
+.user-info h2 { margin:0 0 10px 0; font-size:1.4em; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+.user-info p { margin:3px 0; font-size:1em; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
 
-.user-info p {
-    margin:3px 0;
-    font-size:1em;
-}
-
-/* QR كود */
-.qr-box {
-    margin-top:10px;
-    text-align:right;
-}
-
+/* QR تحت صورة العضو */
+.qr-box { margin-top:10px; text-align:right; z-index:2; }
 .qr-box img {
-    width:100px;
-    border:2px solid gold;
-    border-radius:8px;
+    width:100px; border:2px solid gold; border-radius:8px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.4);
 }
+
+/* الشريط العمودي المائي */
+.profile-strip {
+    position:absolute;
+    top:20px; right:0;
+    width:60px; height:calc(100% - 40px);
+    background: linear-gradient(90deg, #d3d3d3 0%, #f0f0f0 100%);
+    display:flex; flex-direction:column; justify-content:flex-start; align-items:center;
+    padding:5px 0; border-left:1px solid #ccc; z-index:2;
+}
+
+.profile-strip img {
+    width:40px; height:40px; object-fit:cover;
+    filter: grayscale(100%) opacity(30%);
+    border-radius:3px;
+    margin:5px 0;
+    transition: transform 0.3s;
+}
+
+.profile-strip img:hover { transform: scale(1.1); }
 
 /* مميزات البطاقة */
 .card-features {
@@ -163,45 +139,31 @@ body {
     background:white;
     border-radius:15px;
     padding:15px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
     margin-top:15px;
 }
 
-.card-features h3 {
-    margin:0 0 10px 0;
-    color:#800000;
-}
-
-.card-features ul {
-    margin:0;
-    padding-left:20px;
-}
-
-.card-features li {
-    margin-bottom:5px;
-}
+.card-features h3 { margin:0 0 10px 0; color:#800000; }
+.card-features ul { margin:0; padding-left:20px; }
+.card-features li { margin-bottom:5px; }
 
 /* زر تحميل PDF */
 .download-btn {
-    display:block;
-    margin:15px auto 0;
+    display:block; margin:15px auto 0;
     padding:10px 20px;
-    background:#800000;
-    color:white;
-    border:none;
-    border-radius:8px;
-    cursor:pointer;
-    text-align:center;
-    font-size:1em;
-    text-decoration:none;
+    background:#800000; color:white; border:none;
+    border-radius:8px; cursor:pointer;
+    text-align:center; font-size:1em; text-decoration:none;
 }
 
 /* متجاوب */
-@media (max-width: 700px) {
-    .user-card { flex-direction: column; align-items:center; min-height: auto; }
-    .profile-strip { width:80%; margin-left:0; margin-bottom:15px; }
+@media (max-width:700px){
+    .user-card { flex-direction: column; align-items:center; min-height:auto; }
+    .profile-box { margin-left:0; margin-bottom:15px; }
     .user-info { text-align:center; }
     .qr-box { text-align:center; }
+    .profile-strip { position:relative; flex-direction:row; width:100%; height:auto; justify-content:center; margin-top:10px; }
+    .profile-strip img { margin:0 5px; }
 }
 </style>
 </head>
@@ -209,12 +171,16 @@ body {
 
 <div class="card-container">
     <div class="user-card">
-        <!-- شعار أعلى البطاقة -->
         <div class="logo-top"></div>
 
-        <!-- شريط صورة العضو الرقمي -->
-        <div class="profile-strip">
+        <!-- صورة العضو -->
+        <div class="profile-box">
             <img src="{{ user.photo_url }}" alt="صورة العضو">
+        </div>
+
+        <!-- QR تحت صورة العضو -->
+        <div class="qr-box">
+            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
         </div>
 
         <!-- بيانات المستخدم -->
@@ -226,17 +192,20 @@ body {
             <p><strong>الرقم الوطني:</strong> {{ user.national_id or 'غير محدد' }}</p>
             <p><strong>تاريخ التسجيل:</strong> {{ registration_date }}</p>
             <p><strong>صلاحية البطاقة:</strong> {{ expiry_date }}</p>
-
-            <div class="qr-box">
-                <p>امسح الباركود لعرض البطاقة</p>
-                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
-            </div>
         </div>
+
+        <!-- الشريط العمودي المائي -->
+        <div class="profile-strip">
+            {% for i in range(5) %}
+                <img src="{{ user.photo_url }}" alt="صورة المستخدم">
+            {% endfor %}
+        </div>
+
     </div>
 </div>
 
 <!-- مميزات البطاقة -->
-<div class="card-features" id="features-section">
+<div class="card-features">
     <h3>مميزات البطاقة لحاملها:</h3>
     <ul>
         <li>الدخول المجاني إلى أنشطة النادي</li>
@@ -247,30 +216,20 @@ body {
     <a class="download-btn" href="#" onclick="downloadPDF()">تحميل البطاقة كـ PDF</a>
 </div>
 
-<!-- jsPDF + html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 function downloadPDF() {
     const { jsPDF } = window.jspdf;
     var doc = new jsPDF({
-        orientation: "landscape",
-        unit: "px",
-        format: [600, 600]
+        orientation:"landscape",
+        unit:"px",
+        format:[600,500]
     });
-
-    var card = document.querySelector('.user-card');
-    var features = document.getElementById('features-section');
-
-    Promise.all([
-        html2canvas(card),
-        html2canvas(features)
-    ]).then(([cardCanvas, featuresCanvas]) => {
-        var cardImg = cardCanvas.toDataURL('image/png');
-        var featuresImg = featuresCanvas.toDataURL('image/png');
-
-        doc.addImage(cardImg, 'PNG', 0, 0, 600, 300);
-        doc.addImage(featuresImg, 'PNG', 0, 310, 600, 290);
+    var cardContainer = document.querySelector('.card-container');
+    html2canvas(cardContainer).then(canvas => {
+        var imgData = canvas.toDataURL('image/png');
+        doc.addImage(imgData,'PNG',0,0,600,500);
         doc.save('بطاقة_العضو.pdf');
     });
 }
