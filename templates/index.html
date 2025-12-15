@@ -61,6 +61,96 @@ nav a:hover,.admin-btn:hover{
     color:#8B0000;
 }
 
+/* ================= السلايدر ================= */
+.slider{
+    width:100%;
+    height:700px;
+    position:relative;
+    overflow:hidden;
+}
+
+.slide{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    transform:translateX(100%);
+    transition:all 1.2s ease-in-out;
+}
+
+.slide.active{
+    opacity:1;
+    transform:translateX(0);
+    z-index:2;
+}
+
+.slide.prev{
+    transform:translateX(-100%);
+}
+
+.slide img{
+    width:100%;
+    height:700px;
+    object-fit:cover;
+}
+
+.slide::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(to bottom,rgba(0,0,0,.25),rgba(0,0,0,.55));
+}
+
+.slide-text{
+    position:absolute;
+    bottom:90px;
+    right:8%;
+    color:#fff;
+    z-index:3;
+    animation:textMove 1.4s ease;
+}
+
+.slide-text h2{
+    color:gold;
+    font-size:42px;
+    margin:0 0 10px;
+}
+
+.slide-text p{
+    font-size:20px;
+    max-width:520px;
+}
+
+@keyframes textMove{
+    from{opacity:0;transform:translateY(40px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* نقاط التنقل */
+.dots{
+    position:absolute;
+    bottom:25px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:12px;
+    z-index:5;
+}
+
+.dots span{
+    width:14px;
+    height:14px;
+    border-radius:50%;
+    background:#fff;
+    opacity:.5;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.dots span.active{
+    background:gold;
+    opacity:1;
+}
+
 /* ================= الأخبار ================= */
 .news-bar{
     width:100%;
@@ -111,61 +201,39 @@ h2{
     box-shadow:0 20px 40px rgba(0,0,0,.3);
 }
 
-/* صورة اللاعب */
 .player-card img{
     width:100%;
     height:220px;
     object-fit:cover;
-    display:block;
 }
 
-/* العلامة المائية */
-.player-card .watermark {
-    position: absolute;
-    top: 160px; /* يظهر فوق الاسم وجزء من الصورة */
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 50px;
-    background: url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
-    background-size: contain;
-    opacity: 0.45;
-    animation: floatPulse 2.8s ease-in-out infinite;
-    z-index: 10;
-    pointer-events: none;
+.player-card .watermark{
+    position:absolute;
+    top:160px;
+    left:50%;
+    transform:translateX(-50%);
+    width:50px;
+    height:50px;
+    background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
+    background-size:contain;
+    opacity:.45;
+    animation:pulse 3s infinite;
 }
 
-/* نبض خفيف */
-@keyframes floatPulse {
-    0%,100% {
-        transform: translateX(-50%) scale(1);
-        opacity: 0.45;
-    }
-    50% {
-        transform: translateX(-50%) scale(1.15);
-        opacity: 0.75;
-    }
+@keyframes pulse{
+    0%,100%{transform:translateX(-50%) scale(1)}
+    50%{transform:translateX(-50%) scale(1.15)}
 }
 
-/* الاسم */
 .player-name{
-    position:relative;
     background:#800000;
     color:gold;
     text-align:center;
-    padding:36px 10px 12px; /* فراغ للشعار */
+    padding:36px 10px 12px;
     font-weight:bold;
-    overflow:hidden;
 }
 
-/* ================= فاصل ================= */
-.divider{
-    width:70%;
-    margin:40px auto;
-    border:2px solid #800000;
-}
-
-/* ================= مودال الإدارة ================= */
+/* ================= مودال ================= */
 .modal-bg{
     display:none;
     position:fixed;
@@ -197,9 +265,10 @@ button{
     cursor:pointer;
 }
 
-/* ================= استجابة ================= */
-@media(max-width:600px){
-    .logo{width:70px}
+@media(max-width:768px){
+    .slider,.slide img{height:400px}
+    .slide-text h2{font-size:26px}
+    .slide-text p{font-size:16px}
 }
 </style>
 </head>
@@ -221,99 +290,75 @@ button{
     </nav>
 </header>
 
-<div class="modal-bg" id="adminModal">
-    <div class="modal-box">
-        <h3>دخول الإدارة</h3>
-        <input type="password" placeholder="كلمة المرور">
-        <button>دخول</button>
-        <button onclick="closeAdminModal()">إلغاء</button>
+<!-- ===== السلايدر ===== -->
+<div class="slider" id="slider">
+    <div class="slide active">
+        <img src="{{ url_for('static', filename='hi/1.jpg') }}">
+        <div class="slide-text">
+            <h2>نادي مديسيسة الرياضي</h2>
+            <p>منصة رقمية حديثة وخدمات ذكية</p>
+        </div>
     </div>
-</div>
 
-<section>
-<h2>اللاعبين</h2>
+    <div class="slide">
+        <img src="{{ url_for('static', filename='hi/2.jpg') }}">
+        <div class="slide-text">
+            <h2>روح الفريق</h2>
+            <p>نبني الأبطال ونصنع المستقبل</p>
+        </div>
+    </div>
 
-<div class="player-grid">
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/1.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الأول</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/2.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الثاني</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/3.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الثالث</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/4.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الرابع</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/5.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الخامس</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/6.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب السادس</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/7.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب السابع</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/8.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الثامن</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/9.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب التاسع</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/10.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب العاشر</div>
-</div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/11.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">اللاعب الحادي عشر</div>
-</div>
-</div>
+    <div class="slide">
+        <img src="{{ url_for('static', filename='hi/3.jpg') }}">
+        <div class="slide-text">
+            <h2>اكتشاف المواهب</h2>
+            <p>رعاية شاملة للاعبين</p>
+        </div>
+    </div>
 
-<hr class="divider">
+    <div class="slide">
+        <img src="{{ url_for('static', filename='hi/4.jpg') }}">
+        <div class="slide-text">
+            <h2>مديسيسة تجمعنا</h2>
+            <p>رياضة – انتماء – تميز</p>
+        </div>
+    </div>
 
-<h2>إدارة النادي</h2>
-
-<div class="player-grid">
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/12.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">رئيس النادي</div>
+    <div class="dots" id="dots"></div>
 </div>
-<div class="player-card">
-    <img src="{{ url_for('static', filename='images/13.png') }}">
-    <div class="watermark"></div>
-    <div class="player-name">سكرتير الرئيس</div>
-</div>
-</div>
-</section>
 
 <footer style="text-align:center;padding:15px;color:#800000">
 © نادي مديسيسة الرياضي
 </footer>
 
 <script>
+const slides=document.querySelectorAll(".slide");
+const dotsBox=document.getElementById("dots");
+let index=0;
+
+slides.forEach((_,i)=>{
+    const dot=document.createElement("span");
+    if(i===0) dot.classList.add("active");
+    dot.onclick=()=>showSlide(i);
+    dotsBox.appendChild(dot);
+});
+
+const dots=dotsBox.querySelectorAll("span");
+
+function showSlide(i){
+    slides[index].classList.remove("active");
+    dots[index].classList.remove("active");
+    index=i;
+    slides[index].classList.add("active");
+    dots[index].classList.add("active");
+}
+
+setInterval(()=>{
+    let next=index+1;
+    if(next>=slides.length) next=0;
+    showSlide(next);
+},4000);
+
 function openAdminModal(){
     document.getElementById("adminModal").style.display="flex";
 }
