@@ -61,12 +61,35 @@ nav a:hover,.admin-btn:hover{
     color:#8B0000;
 }
 
+/* ================= الأخبار ================= */
+.news-bar{
+    width:100%;
+    background:#800000;
+    overflow:hidden;
+    white-space:nowrap;
+    padding:10px 0;
+}
+
+.news-bar span{
+    display:inline-block;
+    padding-left:100%;
+    animation:scrollNews 50s linear infinite;
+    color:gold;
+    font-weight:bold;
+}
+
+@keyframes scrollNews{
+    from{transform:translateX(-100%)}
+    to{transform:translateX(100%)}
+}
+
 /* ================= السلايدر ================= */
 .slider{
     width:100%;
     height:700px;
     position:relative;
     overflow:hidden;
+    margin-top:10px;
 }
 
 .slide{
@@ -151,28 +174,6 @@ nav a:hover,.admin-btn:hover{
     opacity:1;
 }
 
-/* ================= الأخبار ================= */
-.news-bar{
-    width:100%;
-    background:#800000;
-    overflow:hidden;
-    white-space:nowrap;
-    padding:10px 0;
-}
-
-.news-bar span{
-    display:inline-block;
-    padding-left:100%;
-    animation:scrollNews 50s linear infinite;
-    color:gold;
-    font-weight:bold;
-}
-
-@keyframes scrollNews{
-    from{transform:translateX(-100%)}
-    to{transform:translateX(100%)}
-}
-
 /* ================= اللاعبين ================= */
 h2{
     text-align:center;
@@ -216,13 +217,15 @@ h2{
     height:50px;
     background:url("{{ url_for('static', filename='images/logo1.png') }}") no-repeat center;
     background-size:contain;
-    opacity:.45;
-    animation:pulse 3s infinite;
+    opacity:0.45;
+    animation:floatPulse 2.8s ease-in-out infinite;
+    z-index:10;
+    pointer-events:none;
 }
 
-@keyframes pulse{
-    0%,100%{transform:translateX(-50%) scale(1)}
-    50%{transform:translateX(-50%) scale(1.15)}
+@keyframes floatPulse{
+    0%,100%{transform:translateX(-50%) scale(1); opacity:0.45}
+    50%{transform:translateX(-50%) scale(1.15); opacity:0.75}
 }
 
 .player-name{
@@ -231,6 +234,13 @@ h2{
     text-align:center;
     padding:36px 10px 12px;
     font-weight:bold;
+}
+
+/* ================= فاصل ================= */
+.divider{
+    width:70%;
+    margin:40px auto;
+    border:2px solid #800000;
 }
 
 /* ================= مودال ================= */
@@ -269,6 +279,7 @@ button{
     .slider,.slide img{height:400px}
     .slide-text h2{font-size:26px}
     .slide-text p{font-size:16px}
+    .logo{width:70px}
 }
 </style>
 </head>
@@ -299,7 +310,6 @@ button{
             <p>منصة رقمية حديثة وخدمات ذكية</p>
         </div>
     </div>
-
     <div class="slide">
         <img src="{{ url_for('static', filename='hi/2.jpg') }}">
         <div class="slide-text">
@@ -307,7 +317,6 @@ button{
             <p>نبني الأبطال ونصنع المستقبل</p>
         </div>
     </div>
-
     <div class="slide">
         <img src="{{ url_for('static', filename='hi/3.jpg') }}">
         <div class="slide-text">
@@ -315,7 +324,6 @@ button{
             <p>رعاية شاملة للاعبين</p>
         </div>
     </div>
-
     <div class="slide">
         <img src="{{ url_for('static', filename='hi/4.jpg') }}">
         <div class="slide-text">
@@ -323,9 +331,95 @@ button{
             <p>رياضة – انتماء – تميز</p>
         </div>
     </div>
-
     <div class="dots" id="dots"></div>
 </div>
+
+<div class="modal-bg" id="adminModal">
+    <div class="modal-box">
+        <h3>دخول الإدارة</h3>
+        <input type="password" placeholder="كلمة المرور">
+        <button>دخول</button>
+        <button onclick="closeAdminModal()">إلغاء</button>
+    </div>
+</div>
+
+<section>
+<h2>اللاعبين</h2>
+<div class="player-grid">
+    <!-- جميع بطاقات اللاعبين كما هي من الكود الأصلي -->
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/1.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الأول</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/2.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الثاني</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/3.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الثالث</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/4.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الرابع</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/5.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الخامس</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/6.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب السادس</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/7.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب السابع</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/8.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الثامن</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/9.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب التاسع</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/10.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب العاشر</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/11.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">اللاعب الحادي عشر</div>
+    </div>
+</div>
+
+<hr class="divider">
+
+<h2>إدارة النادي</h2>
+<div class="player-grid">
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/12.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">رئيس النادي</div>
+    </div>
+    <div class="player-card">
+        <img src="{{ url_for('static', filename='images/13.png') }}">
+        <div class="watermark"></div>
+        <div class="player-name">سكرتير الرئيس</div>
+    </div>
+</div>
+</section>
 
 <footer style="text-align:center;padding:15px;color:#800000">
 © نادي مديسيسة الرياضي
