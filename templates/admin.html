@@ -137,8 +137,9 @@ input[type="number"]{
 
 <!-- التحكم في الرصيد -->
 <td>
-<form action="{{ url_for('update_balance', username=u.username) }}" method="post" style="display:flex;justify-content:center;gap:5px;flex-wrap:wrap;">
-    <input type="number" name="amount" min="1" placeholder="عملات">
+<form action="{{ url_for('admin_add_balance') }}" method="post" style="display:flex;justify-content:center;gap:5px;flex-wrap:wrap;">
+    <input type="hidden" name="username" value="{{ u.username }}">
+    <input type="number" name="amount" min="1" placeholder="عملات" required>
     <button name="action" value="add" class="add-btn">➕ إضافة</button>
     <button name="action" value="minus" class="minus-btn">➖ خصم</button>
 </form>
