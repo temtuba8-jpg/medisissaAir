@@ -337,9 +337,11 @@ button{
 <div class="modal-bg" id="adminModal">
     <div class="modal-box">
         <h3>دخول الإدارة</h3>
-        <input type="password" placeholder="كلمة المرور">
-        <button>دخول</button>
-        <button onclick="closeAdminModal()">إلغاء</button>
+        <form method="POST" action="{{ url_for('admin_verify') }}">
+            <input type="password" name="password" placeholder="كلمة المرور" required>
+            <button type="submit">دخول</button>
+            <button type="button" onclick="closeAdminModal()">إلغاء</button>
+        </form>
     </div>
 </div>
 
@@ -463,4 +465,5 @@ function closeAdminModal(){
 
 </body>
 </html>
+
 
