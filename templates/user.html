@@ -18,10 +18,95 @@ body {
     align-items: center;
 }
 
-/* منطقة البطاقة */
+/* ===== الشريط العلوي ===== */
+.top-bar{
+    width:100%;
+    max-width:900px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.balance-box{
+    background:#7a0000;
+    color:#fff;
+    padding:10px 15px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
+
+.balance-box span{
+    font-weight:bold;
+}
+
+.top-actions a{
+    text-decoration:none;
+    margin-left:8px;
+    padding:8px 15px;
+    background:#333;
+    color:#fff;
+    border-radius:8px;
+}
+
+/* ===== القائمة المنبثقة ===== */
+.menu{
+    position:relative;
+}
+
+.menu button{
+    padding:8px 15px;
+    border:none;
+    border-radius:8px;
+    background:#7a0000;
+    color:#fff;
+    cursor:pointer;
+}
+
+.menu-content{
+    display:none;
+    position:absolute;
+    top:40px;
+    right:0;
+    background:#fff;
+    box-shadow:0 10px 25px rgba(0,0,0,.25);
+    border-radius:10px;
+    overflow:hidden;
+    z-index:99;
+}
+
+.menu-content a{
+    display:block;
+    padding:10px 15px;
+    color:#000;
+    text-decoration:none;
+    border-bottom:1px solid #eee;
+}
+
+.menu-content a:hover{
+    background:#f2f0ec;
+}
+
+.menu:hover .menu-content{
+    display:block;
+}
+
+/* ===== منطقة البطاقة ===== */
 #pdfArea {
     width: 100%;
     max-width: 600px;
+    filter: blur(6px);
+    pointer-events:none;
+    transition:.3s;
+}
+
+/* إزالة الفوكس */
+#pdfArea.clear{
+    filter:none;
+    pointer-events:auto;
 }
 
 /* البطاقة */
@@ -46,7 +131,6 @@ body {
     z-index: 0;
 }
 
-/* شعار علوي */
 .logo-top {
     position: absolute;
     top: 15px;
@@ -57,7 +141,6 @@ body {
     z-index: 3;
 }
 
-/* عمود الصورة والباركود */
 .profile-column {
     display: flex;
     flex-direction: column;
@@ -65,7 +148,6 @@ body {
     z-index: 3;
 }
 
-/* صورة المستخدم */
 .profile-box {
     width: 120px;
     height: 120px;
@@ -73,7 +155,6 @@ body {
     border-radius: 16px;
     overflow: hidden;
     background: #fff;
-    box-shadow: 0 5px 15px rgba(0,0,0,.4);
 }
 
 .profile-box img {
@@ -82,7 +163,6 @@ body {
     object-fit: cover;
 }
 
-/* شعار صغير */
 .identity-logo {
     width: 46px;
     height: 46px;
@@ -90,7 +170,6 @@ body {
     background: url('static/images/logo.png') no-repeat center/contain;
 }
 
-/* QR */
 .qr-box img {
     width: 95px;
     height: 95px;
@@ -99,7 +178,6 @@ body {
     background: #fff;
 }
 
-/* بيانات المستخدم */
 .user-info {
     color: #fff;
     flex: 1;
@@ -109,12 +187,12 @@ body {
 .user-info h2 {
     margin: 0 0 8px;
 }
+
 .user-info p {
     margin: 3px 0;
     font-size: 14px;
 }
 
-/* كود تحقق */
 .verify-code {
     margin-top: 8px;
     padding: 6px 10px;
@@ -124,13 +202,11 @@ body {
     display: inline-block;
 }
 
-/* مميزات البطاقة */
 .card-features {
     background: #fff;
     border-radius: 18px;
     margin-top: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,.25);
-    overflow: hidden;
 }
 
 .card-features h3 {
@@ -146,51 +222,67 @@ body {
     margin: 0;
 }
 
-.card-features li {
-    margin-bottom: 6px;
+/* أزرار التحكم */
+.control-buttons{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
 }
 
-/* زر تحميل */
-.download-btn {
-    margin-top: 15px;
-    padding: 12px 25px;
-    background: #7a0000;
-    color: #fff;
-    border-radius: 10px;
-    text-decoration: none;
-    display: inline-block;
-    box-shadow: 0 5px 15px rgba(0,0,0,.3);
-    cursor: pointer;
+.control-buttons button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#7a0000;
+    color:#fff;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
 }
 
-/* موبايل */
-@media(max-width:650px){
-    .user-card {
-        flex-direction: column;
-        text-align: center;
-    }
+.download-btn{
+    display:none;
 }
 </style>
 </head>
 
 <body>
 
+<!-- الشريط العلوي -->
+<div class="top-bar">
+
+    <div class="balance-box">
+        💰 رصيدك: <span id="balance">20</span> عملة
+    </div>
+
+    <div class="menu">
+        <button>الخدمات</button>
+        <div class="menu-content">
+            <a href="#">🏆 مشاهدة كأس العالم 2026</a>
+            <a href="#">🏠 شهادة سكن</a>
+            <a href="#">🎓 شهادة مدرسية</a>
+        </div>
+    </div>
+
+    <div class="top-actions">
+        <a href="/">الرئيسية</a>
+        <a href="/logout">خروج</a>
+    </div>
+
+</div>
+
 <div id="pdfArea">
 
     <div class="user-card">
-
         <div class="logo-top"></div>
 
         <div class="profile-column">
             <div class="profile-box">
-                <img src="{{ user.photo_url }}" alt="صورة المستخدم">
+                <img src="{{ user.photo_url }}">
             </div>
-
             <div class="identity-logo"></div>
-
             <div class="qr-box">
-                <!-- QR Code يظهر بشكل صحيح -->
-                <img src="{{ qr_code }}" alt="QR Code">
+                <img src="{{ qr_code }}">
             </div>
         </div>
 
@@ -202,12 +294,8 @@ body {
             <p>الرقم الوطني: {{ user.national_id or 'غير محدد' }}</p>
             <p>تاريخ التسجيل: {{ registration_date }}</p>
             <p>الصلاحية: {{ expiry_date }}</p>
-
-            <div class="verify-code">
-                كود التحقق: {{ user.card_number }}-MD
-            </div>
+            <div class="verify-code">كود التحقق: {{ user.card_number }}-MD</div>
         </div>
-
     </div>
 
     <div class="card-features">
@@ -216,36 +304,39 @@ body {
             <li>بطاقة رسمية معتمدة</li>
             <li>QR تحقق مباشر</li>
             <li>حماية ضد التزوير</li>
-            <li>صالحة للطباعة</li>
         </ul>
     </div>
-
 </div>
 
-<a class="download-btn" onclick="downloadPDF()">تحميل البطاقة PDF</a>
+<div class="control-buttons">
+    <button onclick="removeBlur()">إزالة الفوكس (10 عملات)</button>
+    <button class="download-btn" id="downloadBtn" onclick="downloadPDF()">تحميل البطاقة PDF</button>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+let balance = 20;
+
+function removeBlur(){
+    if(balance < 10){
+        alert("❌ رصيدك غير كافي");
+        return;
+    }
+    balance -= 10;
+    document.getElementById("balance").innerText = balance;
+    document.getElementById("pdfArea").classList.add("clear");
+    document.getElementById("downloadBtn").style.display="inline-block";
+}
+
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const area = document.getElementById('pdfArea');
     const rect = area.getBoundingClientRect();
-
-    const canvas = await html2canvas(area,{
-        scale:3,
-        useCORS:true
-    });
-
+    const canvas = await html2canvas(area,{scale:3,useCORS:true});
     const imgData = canvas.toDataURL('image/png',1.0);
-
-    const pdf = new jsPDF({
-        orientation:'landscape',
-        unit:'px',
-        format:[rect.width, rect.height]
-    });
-
+    const pdf = new jsPDF({orientation:'landscape',unit:'px',format:[rect.width,rect.height]});
     pdf.addImage(imgData,'PNG',0,0,rect.width,rect.height);
     pdf.save('بطاقة_عضو_رسمية.pdf');
 }
