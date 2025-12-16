@@ -206,7 +206,7 @@ def register():
         photo_file = request.files.get("photo")
         photo_url = save_photo_to_db(photo_file) if photo_file else ""
 
-        # إنشاء المستخدم مع رمز تحقق فريد
+        # إنشاء المستخدم مع رمز تحقق فريد ورصيد 0
         new_user = {
             "username": username,
             "password": password,
@@ -219,7 +219,8 @@ def register():
             "card_number": get_next_card_number(users_col),
             "verify_token": str(__import__("uuid").uuid4()),
             "active": True,
-            "registration_date": datetime.now().strftime("%Y-%m-%d")
+            "registration_date": datetime.now().strftime("%Y-%m-%d"),
+            "balance": 0  # الرصيد الابتدائي صفر
         }
 
         try:
@@ -232,6 +233,7 @@ def register():
             return redirect(url_for("register"))
 
     return render_template("register.html")
+
 #==================
 @app.route("/verify/<token>")
 def verify_card(token):
@@ -518,10 +520,72 @@ def delete_ad(ad_id):
     return redirect(url_for("admin"))
 
 #===========================
+# =====================
+# ADMIN - إضافة رصيد للمستخدم
+# =====================
+@app.route("/admin/add_balance", methods=["POST"])
+def admin_add_balance():
+    if not session.get("is_admin"):
+        flash("❌ غير مصرح")
+        return redirect(url_for("index"))
+
+    username = request.form.get("username", "").strip()
+    amount = int(request.form.get("amount", 0))
+
+    if amount <= 0:
+        flash("❌ قيمة غير صحيحة")
+        return redirect(url_for("admin"))
+
+    db = get_db()
+    users_col = db.users
+
+    user = users_col.find_one({"username": username})
+    if not user:
+        flash("❌ المستخدم غير موجود")
+        return redirect(url_for("admin"))
+
+    users_col.update_one(
+        {"_id": user["_id"]},
+        {"$inc": {"balance": amount}}
+    )
+
+    flash(f"✅ تم إضافة {amount} عملات للمستخدم {username}")
+    return redirect(url_for("admin"))
+#=====================
+# =====================
+# USER - خصم 10 عملات عند إزالة الفوكس
+# =====================
+@app.route("/remove_focus", methods=["POST"])
+def remove_focus():
+    if "user" not in session:
+        return {"status": "error", "msg": "غير مسجل دخول"}, 401
+
+    db = get_db()
+    users_col = db.users
+
+    user = users_col.find_one({"username": session["user"]["username"]})
+    if not user:
+        return {"status": "error", "msg": "المستخدم غير موجود"}, 404
+
+    balance = user.get("balance", 0)
+    if balance < 10:
+        return {"status": "error", "msg": "رصيد غير كافي"}, 400
+
+    users_col.update_one(
+        {"_id": user["_id"]},
+        {"$inc": {"balance": -10}}
+    )
+
+    return {
+        "status": "success",
+        "new_balance": balance - 10
+    }
+
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
