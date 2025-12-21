@@ -9,7 +9,7 @@
 
 body { 
     font-family:'Cairo',sans-serif; 
-    background: linear-gradient(135deg, #8B0000, #FFA500); /* تدرج من أحمر داكن إلى برتقالي ذهبي */
+    background: linear-gradient(135deg, #8B0000, #FFA500);
     color:#fff; 
     margin:0; 
     padding:0; 
@@ -45,7 +45,7 @@ header img.logo {
 }
 
 form { 
-    background: rgba(255, 255, 255, 0.9); /* خلفية فاتحة شفافة قليلاً */
+    background: rgba(255, 255, 255, 0.95);
     color: #330000;
     padding:20px; 
     border:2px solid gold; 
@@ -82,8 +82,20 @@ button:hover {
 }
 
 .error { 
-    color:red; 
-    margin-top:10px; 
+    color:#b30000;
+    background: #ffe6e6;
+    border: 1px solid #ff8080;
+    padding:8px;
+    border-radius:5px;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-weight:bold;
+}
+
+.error::before {
+    content: "⚠️";
 }
 
 .register-link {
@@ -120,6 +132,7 @@ button:hover {
         <input type="text" name="username" placeholder="اسم المستخدم" required>
         <input type="password" name="password" placeholder="كلمة المرور" required>
         <button type="submit">تسجيل الدخول</button>
+
         {% if error %}
         <p class="error">{{ error }}</p>
         {% endif %}
