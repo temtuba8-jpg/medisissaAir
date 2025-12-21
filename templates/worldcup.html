@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مشاهدة كأس العالم 2026 - نادي مديسيسة</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo&display=swap');
+
+body{
+    font-family:'Cairo',sans-serif;
+    margin:0;
+    background:#f2f0ec;
+    color:#330000;
+}
+
+/* ===== الشريط العلوي ===== */
+.top-bar{
+    background:#7a0000;
+    color:#fff;
+    padding:12px 15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.top-bar .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.top-bar .logo img{
+    width:45px;
+}
+
+.top-bar a{
+    color:#fff;
+    text-decoration:none;
+    margin-right:10px;
+    font-size:14px;
+}
+
+/* ===== عنوان الصفحة ===== */
+.page-title{
+    text-align:center;
+    margin:20px 10px;
+}
+
+.page-title h1{
+    margin:0;
+    color:#7a0000;
+}
+
+/* ===== مشغل البث ===== */
+.player-wrapper{
+    max-width:900px;
+    margin:0 auto 30px;
+    padding:10px;
+}
+
+.video-box{
+    position:relative;
+    padding-top:56.25%;
+    background:#000;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,.35);
+}
+
+.video-box iframe{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    border:none;
+}
+
+/* ===== تنبيه ===== */
+.notice{
+    max-width:900px;
+    margin:15px auto;
+    background:#fff;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
+    font-size:14px;
+}
+
+/* ===== أزرار التحكم ===== */
+.controls{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.controls button{
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#7a0000;
+    color:#fff;
+    cursor:pointer;
+    margin:5px;
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
+
+/* ===== موبايل ===== */
+@media(max-width:600px){
+    .page-title h1{
+        font-size:20px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- الشريط العلوي -->
+<div class="top-bar">
+    <div class="logo">
+        <img src="static/images/logo.png" alt="نادي مديسيسة">
+        <strong>نادي مديسيسة الرياضي</strong>
+    </div>
+    <div>
+        <a href="/">الرئيسية</a>
+        <a href="/dashboard">لوحة العضو</a>
+        <a href="/logout">خروج</a>
+    </div>
+</div>
+
+<!-- العنوان -->
+<div class="page-title">
+    <h1>🏆 البث المباشر – كأس العالم 2026</h1>
+    <p>مشاهدة حصرية لأعضاء نادي مديسيسة</p>
+</div>
+
+<!-- مشغل الفيديو -->
+<div class="player-wrapper">
+    <div class="video-box">
+        <iframe
+            src="https://www.youtube.com/embed/CTkj0n7HP4s?autoplay=1&mute=1"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
+<!-- تنبيه -->
+<div class="notice">
+    ⚠️ في حال توقف البث، يرجى تحديث الصفحة.  
+    البث مخصص لأعضاء نادي مديسيسة فقط.
+</div>
+
+<!-- أزرار -->
+<div class="controls">
+    <button onclick="location.reload()">🔄 تحديث البث</button>
+    <button onclick="history.back()">⬅️ رجوع</button>
+</div>
+
+</body>
+</html>
