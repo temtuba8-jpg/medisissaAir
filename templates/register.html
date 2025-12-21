@@ -27,12 +27,12 @@ body {
 }
 
 header {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 header img.logo {
     width: 100px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
     animation: heartbeat 1s infinite;
 }
 
@@ -41,6 +41,20 @@ header img.logo {
     25% { transform: scale(1.2); }
     50% { transform: scale(1); }
     75% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* نص التنبيه أعلى الفورم */
+.username-note {
+    font-weight:bold;
+    margin-bottom: 15px;
+    color: #ffeb3b;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
     100% { transform: scale(1); }
 }
 
@@ -72,18 +86,31 @@ button {
     border-radius:5px; 
     cursor:pointer; 
     font-weight:bold; 
-    transition: background 0.3s;
+    transition: background 0.3s, transform 0.3s;
     color:#8B0000;
     font-size:1em;
 }
 
 button:hover {
     background:#e6b800;
+    transform: scale(1.05);
 }
 
 .error { 
-    color:red; 
-    margin-top:10px; 
+    color:#b30000;
+    background: #ffe6e6;
+    border: 1px solid #ff8080;
+    padding:8px;
+    border-radius:5px;
+    margin-top:10px;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-weight:bold;
+}
+
+.error::before {
+    content: "⚠️";
 }
 
 .success {
@@ -92,19 +119,19 @@ button:hover {
     margin-top:10px;
 }
 
-.login-link {
+.login-link, .home-link {
     margin-top:15px;
     font-size:0.95em;
 }
 
-.login-link a {
+.login-link a, .home-link a {
     color:#330000;
     font-weight:bold;
     text-decoration:none;
     transition: color 0.3s;
 }
 
-.login-link a:hover {
+.login-link a:hover, .home-link a:hover {
     color:#8B0000;
 }
 
@@ -122,8 +149,10 @@ button:hover {
         <h2>تسجيل مستخدم جديد</h2>
     </header>
 
-    <form method="POST" enctype="multipart/form-data">
-        <input type="text" name="username" placeholder="اسم المستخدم" required>
+    <p class="username-note">يجب أن يكون اسم المستخدم باللغة الإنجليزية</p>
+
+    <form id="registerForm" method="POST" enctype="multipart/form-data">
+        <input type="text" name="username" id="username" placeholder="اسم المستخدم (بالإنجليزية)" required>
         <input type="password" name="password" placeholder="كلمة المرور" required>
         <input type="text" name="full_name" placeholder="الاسم الكامل" required>
         <input type="text" name="phone" placeholder="رقم الجوال" required>
@@ -132,6 +161,8 @@ button:hover {
         <label style="text-align:left;">الصورة الشخصية:</label>
         <input type="file" name="photo" accept="image/*">
         <button type="submit">تسجيل</button>
+
+        <p id="usernameError" class="error" style="display:none;"></p>
 
         {% if error %}
         <p class="error">{{ error }}</p>
@@ -150,6 +181,26 @@ button:hover {
     <div class="login-link">
         <p>لديك حساب؟ <a href="{{ url_for('login') }}">تسجيل الدخول</a></p>
     </div>
+    <div class="home-link">
+        <p><a href="{{ url_for('index') }}">🏠 العودة للرئيسية</a></p>
+    </div>
 </div>
+
+<script>
+// تحقق من أن اسم المستخدم بالإنجليزية فقط قبل الإرسال
+document.getElementById("registerForm").addEventListener("submit", function(e){
+    const usernameInput = document.getElementById("username").value.trim();
+    const usernameError = document.getElementById("usernameError");
+    const englishRegex = /^[A-Za-z0-9_]+$/; // يسمح بالأحرف الإنجليزية والأرقام و _
+
+    if(!englishRegex.test(usernameInput)){
+        e.preventDefault();
+        usernameError.textContent = "اسم المستخدم يجب أن يكون بالأحرف الإنجليزية فقط (أرقام و _ مسموح بها)";
+        usernameError.style.display = "block";
+    } else {
+        usernameError.style.display = "none";
+    }
+});
+</script>
 </body>
 </html>
