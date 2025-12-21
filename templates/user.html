@@ -314,17 +314,29 @@ body {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <script>
-let balance = 20;
+let balance = parseInt(localStorage.getItem("balance") || "20");
+let pdfCleared = localStorage.getItem("pdfCleared") === "true";
+
+// تحديث الرصيد عند تحميل الصفحة
+document.getElementById("balance").innerText = balance;
+
+// إذا تم إزالة الفوكس مسبقًا
+if(pdfCleared){
+    document.getElementById("pdfArea").classList.add("clear");
+    document.getElementById("downloadBtn").style.display="inline-block";
+}
 
 function removeBlur(){
     if(balance < 10){
         alert("❌ رصيدك غير كافي");
         return;
     }
+
     balance -= 10;
+    localStorage.setItem("balance", balance);
+    localStorage.setItem("pdfCleared", "true"); // تخزين بصيغة string
+
     document.getElementById("balance").innerText = balance;
     document.getElementById("pdfArea").classList.add("clear");
     document.getElementById("downloadBtn").style.display="inline-block";
@@ -342,6 +354,8 @@ async function downloadPDF(){
 }
 </script>
 
+
 </body>
 </html>
+
 
