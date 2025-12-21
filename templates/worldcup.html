@@ -63,7 +63,7 @@ body{
 
 .video-box{
     position:relative;
-    padding-top:56.25%;
+    padding-top:56.25%; /* نسبة 16:9 */
     background:#000;
     border-radius:18px;
     overflow:hidden;
@@ -72,7 +72,8 @@ body{
 
 .video-box iframe{
     position:absolute;
-    inset:0;
+    top:0;
+    left:0;
     width:100%;
     height:100%;
     border:none;
@@ -139,9 +140,9 @@ body{
 <!-- مشغل الفيديو -->
 <div class="player-wrapper">
     <div class="video-box">
-        <iframe
-            src="https://youtu.be/QWMaZO-q64c?si=s_icYluqbp52kS8k"
-            allow="autoplay; encrypted-media; picture-in-picture"
+        <iframe 
+            src="https://youtu.be/QWMaZO-q64c?si=A4HA422vJaKUufeD" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
             allowfullscreen>
         </iframe>
     </div>
