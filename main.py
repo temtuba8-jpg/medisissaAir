@@ -589,10 +589,31 @@ def remove_focus():
 def worldcup():
     return render_template("worldcup.html")
 
+
+#===============
+@app.route("/user_data")
+def user_data():
+    user_session = session.get("user")
+    if not user_session:
+        return {"balance": 0, "pdfCleared": False}, 401
+
+    db = get_db()
+    users_col = db.users
+    user = users_col.find_one({"username": user_session["username"]})
+    if not user:
+        return {"balance": 0, "pdfCleared": False}, 404
+
+    return {
+        "balance": user.get("balance", 0),
+        "pdfCleared": user.get("pdfCleared", False)
+    }
+
+
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
