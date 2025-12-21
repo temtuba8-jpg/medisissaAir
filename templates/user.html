@@ -315,31 +315,37 @@ body {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-let balance = parseInt(localStorage.getItem("balance") || "20");
-let pdfCleared = localStorage.getItem("pdfCleared") === "true";
+async function fetchUserData() {
+    try {
+        // جلب بيانات المستخدم من السيرفر (يمكن تعديل endpoint ليعيد balance وpdfCleared)
+        const res = await fetch("/user_data"); // هذا endpoint تحتاج تضيفه في Flask
+        const data = await res.json();
+        document.getElementById("balance").innerText = data.balance;
 
-// تحديث الرصيد عند تحميل الصفحة
-document.getElementById("balance").innerText = balance;
-
-// إذا تم إزالة الفوكس مسبقًا
-if(pdfCleared){
-    document.getElementById("pdfArea").classList.add("clear");
-    document.getElementById("downloadBtn").style.display="inline-block";
+        if (data.pdfCleared) {
+            document.getElementById("pdfArea").classList.add("clear");
+            document.getElementById("downloadBtn").style.display = "inline-block";
+        }
+    } catch (err) {
+        console.error("خطأ عند جلب بيانات المستخدم:", err);
+    }
 }
 
-function removeBlur(){
-    if(balance < 10){
-        alert("❌ رصيدك غير كافي");
-        return;
+async function removeBlur() {
+    try {
+        const res = await fetch("/remove_focus", { method: "POST" });
+        const data = await res.json();
+
+        if (data.status === "success") {
+            document.getElementById("balance").innerText = data.new_balance;
+            document.getElementById("pdfArea").classList.add("clear");
+            document.getElementById("downloadBtn").style.display = "inline-block";
+        } else {
+            alert(data.msg);
+        }
+    } catch (err) {
+        alert("❌ حدث خطأ، حاول مرة أخرى");
     }
-
-    balance -= 10;
-    localStorage.setItem("balance", balance);
-    localStorage.setItem("pdfCleared", "true"); // تخزين بصيغة string
-
-    document.getElementById("balance").innerText = balance;
-    document.getElementById("pdfArea").classList.add("clear");
-    document.getElementById("downloadBtn").style.display="inline-block";
 }
 
 async function downloadPDF(){
@@ -352,10 +358,15 @@ async function downloadPDF(){
     pdf.addImage(imgData,'PNG',0,0,rect.width,rect.height);
     pdf.save('بطاقة_عضو_رسمية.pdf');
 }
+
+// عند تحميل الصفحة
+document.addEventListener("DOMContentLoaded", fetchUserData);
 </script>
+
 
 
 </body>
 </html>
+
 
 
