@@ -581,10 +581,15 @@ def remove_focus():
         "new_balance": balance - 10
     }
 
+@app.route("/worldcup")
+def worldcup():
+    return render_template("worldcup.html")
+
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
