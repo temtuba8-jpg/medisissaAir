@@ -571,15 +571,19 @@ def remove_focus():
     if balance < 10:
         return {"status": "error", "msg": "رصيد غير كافي"}, 400
 
+    # خصم الرصيد وفتح الفوكس
+    new_balance = balance - 10
     users_col.update_one(
         {"_id": user["_id"]},
-        {"$inc": {"balance": -10}}
+        {"$set": {"pdfCleared": True, "balance": new_balance}}
     )
 
     return {
         "status": "success",
-        "new_balance": balance - 10
+        "new_balance": new_balance,
+        "pdfCleared": True
     }
+
 
 @app.route("/worldcup")
 def worldcup():
@@ -589,6 +593,7 @@ def worldcup():
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
