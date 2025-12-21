@@ -264,30 +264,33 @@ def verify_card(token):
 def login():
     db = get_db()
     users_col = db.users
+    error = None  # متغير لتخزين رسالة الخطأ
+
     if request.method == "POST":
         username = (request.form.get("username") or "").strip()
         password = (request.form.get("password") or "").strip()
 
         if not username or not password:
-            flash("❌ الرجاء تعبئة جميع الحقول")
-            return redirect(url_for("login"))
+            error = "❌ الرجاء تعبئة جميع الحقول"
+        else:
+            try:
+                user = users_col.find_one({"username": username})
+            except Exception:
+                traceback.print_exc()
+                user = None
 
-        try:
-            user = users_col.find_one({"username": username})
-        except Exception:
-            traceback.print_exc()
-            user = None
+            if not user:
+                error = "❌ اسم المستخدم غير موجود"
+            elif user.get("password") != password:
+                error = "❌ كلمة المرور خاطئة"
+            else:
+                session["user"] = {"username": username, "role": "user"}
+                session.permanent = True
+                flash("✅ تسجيل الدخول ناجح")
+                return redirect(url_for("user_page"))
 
-        if user and user.get("password") == password:
-            session["user"] = {"username": username, "role": "user"}
-            session.permanent = True
-            flash(f"✅ تسجيل الدخول ناجح (user)")
-            return redirect(url_for("user_page"))
+    return render_template("login.html", error=error)
 
-        flash("❌ اسم المستخدم أو كلمة المرور غير صحيحة")
-        return redirect(url_for("login"))
-
-    return render_template("login.html")
 @app.route("/user")
 def user_page():
     user_session = session.get("user")
@@ -613,6 +616,7 @@ def user_data():
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
