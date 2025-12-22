@@ -9,6 +9,7 @@ import sys
 import traceback
 from datetime import datetime, timedelta
 from bson.objectid import ObjectId  # لإدارة _id في MongoDB
+from datetime import date
 
 app = Flask(__name__)
 app.secret_key = "secretkey123"
@@ -611,11 +612,37 @@ def user_data():
         "pdfCleared": user.get("pdfCleared", False)
     }
 
+#==============
+@app.route("/certificate/residence")
+def certificate_residence():
+    if "user" not in session:
+        flash("❌ يجب تسجيل الدخول")
+        return redirect(url_for("login"))
+
+    db = get_db()
+    users_col = db.users
+
+    user = users_col.find_one({"username": session["user"]["username"]})
+    if not user:
+        flash("❌ المستخدم غير موجود")
+        return redirect(url_for("login"))
+
+    today = date.today().strftime("%Y/%m/%d")
+
+    return render_template(
+        "certificate_residence.html",
+        user=user,
+        today=today
+    )
+
+
+
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
