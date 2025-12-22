@@ -5,18 +5,17 @@
 <title>شهادة سكن</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
 
 <style>
-/* ===============================
-   عزل الصفحة بالكامل
-================================ */
+/* ===== عزل كامل من أي فوكس خارجي ===== */
 *{
     filter:none !important;
     backdrop-filter:none !important;
     transform:none !important;
 }
 
+/* ===== الصفحة ===== */
 body{
     font-family:'Cairo',sans-serif;
     background:#eee;
@@ -26,32 +25,40 @@ body{
     align-items:center;
 }
 
-/* ===============================
-   مساحة الشهادة (بدون فوكس نهائيًا)
-================================ */
+/* ===== تنبيه غير معتمد (لا يدخل PDF) ===== */
+.notice{
+    width:1000px;
+    margin-bottom:12px;
+    padding:12px 18px;
+    background:#fff3cd;
+    color:#856404;
+    border:1px solid #ffeeba;
+    border-radius:10px;
+    font-size:15px;
+    font-weight:600;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+}
+
+/* ===== الشهادة ===== */
 #certificate{
     width:1000px;
     height:560px;
     position:relative;
 
-    background-image:url("/static/images/certificate_bg.jpg");
-    background-repeat:no-repeat;
-    background-position:center;
+    background:url("/static/images/certificate_bg.jpg") no-repeat center;
     background-size:100% 100%;
 
-    /* منع أي تأثير موروث */
     filter:none !important;
     backdrop-filter:none !important;
-    transform:none !important;
 
-    /* تحسين حدة الصورة */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    image-rendering:-webkit-optimize-contrast;
+    image-rendering:crisp-edges;
 
     box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
-/* ===== الاسم ===== */
+/* ===== الاسم (للعرض فقط) ===== */
 .name{
     position:absolute;
     top:155px;
@@ -59,18 +66,20 @@ body{
     right:0;
     text-align:center;
     font-size:38px;
-    font-weight:700;
+    font-weight:600;
     color:#1b7f6a;
-    letter-spacing:1px;
+    letter-spacing:0;
+    direction:rtl;
+    unicode-bidi:plaintext;
 }
 
-/* ===== الرقم الوطني (منزل 40px) ===== */
+/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:255px; /* نزلناه 40px بالضبط */
+    top:255px;
     right:260px;
     font-size:22px;
-    font-weight:700;
+    font-weight:600;
     color:#1b7f6a;
     direction:ltr;
     font-family:Arial, sans-serif;
@@ -82,7 +91,7 @@ body{
     bottom:95px;
     right:170px;
     font-size:18px;
-    font-weight:700;
+    font-weight:600;
     color:#1b7f6a;
     direction:ltr;
     font-family:Arial, sans-serif;
@@ -104,10 +113,17 @@ button{
 
 <body>
 
+<!-- ===== التنبيه ===== -->
+<div class="notice" id="notice">
+⚠️ تنبيه: هذه الشهادة غير معتمدة حتى يتم ختمها والتوقيع عليها من رئيس اللجنة بالقرية.
+يرجى طباعتها وإحضارها لرئيسة اللجنة لاعتمادها رسميًا.
+</div>
+
+<!-- ===== الشهادة ===== -->
 <div id="certificate">
-    <div class="name">{{ user.full_name }}</div>
-    <div class="national">{{ user.national_id }}</div>
-    <div class="date">{{ today }}</div>
+    <div class="name" id="name">{{ user.full_name }}</div>
+    <div class="national" id="nid">{{ user.national_id }}</div>
+    <div class="date" id="date">{{ today }}</div>
 </div>
 
 <button onclick="downloadPDF()">تحميل الشهادة PDF</button>
@@ -118,25 +134,49 @@ button{
 <script>
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
+
     const cert = document.getElementById("certificate");
+    const name = document.getElementById("name").innerText;
+    const nid  = document.getElementById("nid").innerText;
+    const date = document.getElementById("date").innerText;
+
+    /* إخفاء التنبيه والنص */
+    document.getElementById("notice").style.display = "none";
+    document.getElementById("name").style.visibility = "hidden";
+    document.getElementById("nid").style.visibility  = "hidden";
+    document.getElementById("date").style.visibility = "hidden";
 
     const canvas = await html2canvas(cert,{
-        scale:4,              // جودة عالية جدًا للطباعة
+        scale:5,
         useCORS:true,
-        backgroundColor:null,
-        removeContainer:true
+        backgroundColor:null
     });
 
     const img = canvas.toDataURL("image/png",1.0);
 
-    const pdf = new jsPDF(
-        "landscape",
-        "px",
-        [cert.offsetWidth, cert.offsetHeight]
-    );
+    const pdf = new jsPDF("landscape","px",[1000,560]);
+    pdf.addImage(img,"PNG",0,0,1000,560);
 
-    pdf.addImage(img,"PNG",0,0,cert.offsetWidth, cert.offsetHeight);
+    /* كتابة النص داخل PDF */
+    pdf.setTextColor(27,127,106);
+    pdf.setFont("Helvetica","bold");
+
+    pdf.setFontSize(38);
+    pdf.text(name, 500, 190, { align:"center" });
+
+    pdf.setFontSize(22);
+    pdf.text(nid, 740, 290);
+
+    pdf.setFontSize(18);
+    pdf.text(date, 830, 480);
+
     pdf.save("شهادة_سكن_مديسيسة.pdf");
+
+    /* إرجاع العناصر */
+    document.getElementById("notice").style.display = "block";
+    document.getElementById("name").style.visibility = "visible";
+    document.getElementById("nid").style.visibility  = "visible";
+    document.getElementById("date").style.visibility = "visible";
 }
 </script>
 
