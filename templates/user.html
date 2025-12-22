@@ -454,10 +454,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const serviceButtons = document.querySelectorAll(".service-btn");
     serviceButtons.forEach(btn => {
         btn.addEventListener("click", async () => {
-            const serviceName = btn.textContent.replace(/\d+/g,'').trim();
+            // استخراج اسم الخدمة بدون الرقم داخل span
+            const serviceName = btn.childNodes[0].textContent.trim();
             const service = servicesData[serviceName];
 
-            if(!service) return;
+            if(!service) {
+                console.error("Service not found:", serviceName);
+                return;
+            }
 
             if(confirm(`🔔 هل ترغب باستخدام ${service.cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
                 try {
