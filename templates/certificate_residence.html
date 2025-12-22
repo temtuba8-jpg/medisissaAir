@@ -8,14 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
 
 <style>
-/* ===== عزل كامل من أي فوكس خارجي ===== */
 *{
     filter:none !important;
     backdrop-filter:none !important;
     transform:none !important;
 }
 
-/* ===== الصفحة ===== */
 body{
     font-family:'Cairo',sans-serif;
     background:#eee;
@@ -25,7 +23,7 @@ body{
     align-items:center;
 }
 
-/* ===== تنبيه غير معتمد (لا يدخل PDF) ===== */
+/* ===== تنبيه ===== */
 .notice{
     width:1000px;
     margin-bottom:12px;
@@ -37,7 +35,6 @@ body{
     font-size:15px;
     font-weight:600;
     text-align:center;
-    box-shadow:0 4px 10px rgba(0,0,0,.08);
 }
 
 /* ===== الشهادة ===== */
@@ -45,30 +42,31 @@ body{
     width:1000px;
     height:560px;
     position:relative;
-
-    background:url("/static/images/certificate_bg.jpg") no-repeat center;
-    background-size:100% 100%;
-
-    filter:none !important;
-    backdrop-filter:none !important;
-
-    image-rendering:-webkit-optimize-contrast;
-    image-rendering:crisp-edges;
-
+    overflow:hidden;
     box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
-/* ===== الاسم (للعرض فقط) ===== */
+/* ===== الخلفية (حل الفوكس النهائي) ===== */
+#certificate img.bg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:fill;
+    image-rendering:auto;
+    pointer-events:none;
+}
+
+/* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:155px;
+    top:175px;   /* ↓ نازل 20px */
     left:0;
     right:0;
     text-align:center;
     font-size:38px;
     font-weight:600;
     color:#1b7f6a;
-    letter-spacing:0;
     direction:rtl;
     unicode-bidi:plaintext;
 }
@@ -76,7 +74,7 @@ body{
 /* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:255px;
+    top:270px;  /* ↓ نازل 15px */
     right:260px;
     font-size:22px;
     font-weight:600;
@@ -97,7 +95,6 @@ body{
     font-family:Arial, sans-serif;
 }
 
-/* زر */
 button{
     margin-top:20px;
     padding:12px 25px;
@@ -113,14 +110,16 @@ button{
 
 <body>
 
-<!-- ===== التنبيه ===== -->
 <div class="notice" id="notice">
 ⚠️ تنبيه: هذه الشهادة غير معتمدة حتى يتم ختمها والتوقيع عليها من رئيس اللجنة بالقرية.
 يرجى طباعتها وإحضارها لرئيسة اللجنة لاعتمادها رسميًا.
 </div>
 
-<!-- ===== الشهادة ===== -->
 <div id="certificate">
+    <!-- الخلفية -->
+    <img src="/static/images/certificate_bg.jpg" class="bg" crossorigin="anonymous">
+
+    <!-- البيانات -->
     <div class="name" id="name">{{ user.full_name }}</div>
     <div class="national" id="nid">{{ user.national_id }}</div>
     <div class="date" id="date">{{ today }}</div>
@@ -140,7 +139,6 @@ async function downloadPDF(){
     const nid  = document.getElementById("nid").innerText;
     const date = document.getElementById("date").innerText;
 
-    /* إخفاء التنبيه والنص */
     document.getElementById("notice").style.display = "none";
     document.getElementById("name").style.visibility = "hidden";
     document.getElementById("nid").style.visibility  = "hidden";
@@ -148,8 +146,7 @@ async function downloadPDF(){
 
     const canvas = await html2canvas(cert,{
         scale:5,
-        useCORS:true,
-        backgroundColor:null
+        useCORS:true
     });
 
     const img = canvas.toDataURL("image/png",1.0);
@@ -157,22 +154,20 @@ async function downloadPDF(){
     const pdf = new jsPDF("landscape","px",[1000,560]);
     pdf.addImage(img,"PNG",0,0,1000,560);
 
-    /* كتابة النص داخل PDF */
     pdf.setTextColor(27,127,106);
     pdf.setFont("Helvetica","bold");
 
     pdf.setFontSize(38);
-    pdf.text(name, 500, 190, { align:"center" });
+    pdf.text(name, 500, 200, { align:"center" });
 
     pdf.setFontSize(22);
-    pdf.text(nid, 740, 290);
+    pdf.text(nid, 740, 305);
 
     pdf.setFontSize(18);
     pdf.text(date, 830, 480);
 
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    /* إرجاع العناصر */
     document.getElementById("notice").style.display = "block";
     document.getElementById("name").style.visibility = "visible";
     document.getElementById("nid").style.visibility  = "visible";
