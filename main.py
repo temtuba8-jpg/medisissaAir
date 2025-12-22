@@ -65,6 +65,29 @@ def get_db():
     return True, new_balance
 
 #====================
+def deduct_coins_for_service(username, db, service_name):
+    users_col = db.users
+    user = users_col.find_one({"username": username})
+    if not user:
+        return False, "المستخدم غير موجود"
+
+    services_cost = {
+        "🏠 شهادة السكن": 6,
+        "🏆 مشاهدة كأس العالم": 4,
+        "🎓 شهادة مدرسية": 10
+    }
+
+    amount_to_deduct = services_cost.get(service_name)
+    if amount_to_deduct is None:
+        return False, "الخدمة غير موجودة"
+
+    balance = user.get("balance", 0)
+    if balance < amount_to_deduct:
+        return False, "رصيد العملات غير كافٍ"
+
+    new_balance = balance - amount_to_deduct
+    users_col.update_one({"_id": user["_id"]}, {"$set": {"balance": new_balance}})
+    return True, new_balance
 
 #====================
 def save_photo_to_db(photo_file):
@@ -715,9 +738,40 @@ def deduct_certificate_coins():
 
     return {"status": "success", "new_balance": result}
 
+#===============
+serviceButtons.forEach(btn => {
+    btn.addEventListener("click", async () => {
+        const serviceName = btn.textContent.replace(/\d+/g,'').trim();
+
+        if(!servicesData[serviceName]) return;
+
+        if(confirm(`🔔 هل ترغب باستخدام ${servicesData[serviceName].cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
+            try {
+                const res = await fetch("/pay_service", {
+                    method: "POST",
+                    headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({service: serviceName})
+                });
+                const data = await res.json();
+
+                if(data.status==="success"){
+                    document.getElementById("balance").innerText = data.new_balance;
+                    window.location.href = data.redirect_url; // تحويل المستخدم للصفحة المطلوبة
+                } else {
+                    alert(data.msg); // تنبيه إذا الرصيد غير كافٍ
+                }
+
+            } catch(err){
+                alert("❌ حدث خطأ أثناء عملية الدفع، حاول مرة أخرى.");
+                console.error(err);
+            }
+        }
+    });
+});
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
