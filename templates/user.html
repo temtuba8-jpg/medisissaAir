@@ -300,7 +300,6 @@ body {
 
 <!-- الشريط العلوي -->
 <div class="top-bar">
-
     <div class="balance-box">
         💰 رصيدك: <span id="balance">0</span> عملة
     </div>
@@ -309,7 +308,6 @@ body {
         <a href="/">الرئيسية</a>
         <a href="/logout">خروج</a>
     </div>
-
 </div>
 
 <!-- رسالة الترحيب -->
@@ -384,12 +382,14 @@ body {
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <script>
-// بيانات الخدمات مع التكلفة
+// بيانات الخدمات مع التكلفة والصفحة الهدف
 const servicesData = {
-    "🏠 شهادة السكن": 6,
-    "🏆 مشاهدة كأس العالم": 4,
-    "🎓 شهادة مدرسية": 10
+    "🏠 شهادة السكن": {cost: 6, url: "/certificate/residence"},
+    "🏆 مشاهدة كأس العالم": {cost: 4, url: "/worldcup"},
+    "🎓 شهادة مدرسية": {cost: 10, url: "/certificate/school"}
 };
 
 async function fetchUserData() {
@@ -455,9 +455,11 @@ document.addEventListener("DOMContentLoaded", () => {
     serviceButtons.forEach(btn => {
         btn.addEventListener("click", async () => {
             const serviceName = btn.textContent.replace(/\d+/g,'').trim();
-            const cost = servicesData[serviceName];
+            const service = servicesData[serviceName];
 
-            if(confirm(`🔔 هل ترغب باستخدام ${cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
+            if(!service) return;
+
+            if(confirm(`🔔 هل ترغب باستخدام ${service.cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
                 try {
                     const res = await fetch("/pay_service", {
                         method: "POST",
@@ -468,7 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if(data.status==="success"){
                         document.getElementById("balance").innerText = data.new_balance;
-                        alert(`✅ تم خصم ${cost} عملة رقمية بنجاح للحصول على "${serviceName}"!`);
+                        alert(`✅ تم خصم ${service.cost} عملة رقمية بنجاح للحصول على "${serviceName}"!`);
+                        // تحويل المستخدم للصفحة المطلوبة
+                        window.location.href = service.url;
                     } else {
                         alert(`❌ فشل العملية: ${data.msg}`);
                     }
