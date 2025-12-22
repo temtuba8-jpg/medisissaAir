@@ -24,12 +24,13 @@ body{
     position:relative;
     background:url("/static/images/certificate_bg.jpg") no-repeat center/cover;
     box-shadow:0 10px 30px rgba(0,0,0,.3);
+    background-size: cover; /* تأكد من ملء الخلفية بالكامل */
 }
 
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top: 205px;          /* مكان Name & Surname */
+    top:155px;          /* رفع الاسم بمقدار 50px */
     left: 0;
     right: 0;
     text-align:center;
@@ -42,7 +43,7 @@ body{
 /* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top: 265px;          /* مكان النقاط للرقم الوطني */
+    top:215px;          /* رفع الرقم الوطني بمقدار 50px */
     right: 260px;
     font-size:22px;
     font-weight:700;
@@ -54,7 +55,7 @@ body{
 /* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom: 95px;        /* مكان التاريخ */
+    bottom: 95px;
     right: 170px;
     font-size:18px;
     font-weight:700;
