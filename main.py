@@ -44,7 +44,29 @@ def get_db():
 
 # =====================
 # Helpers
-# =====================
+# =====================def deduct_coins_for_certificate(user_username, db):
+    """
+    تخصم 6 عملات من المستخدم عند مشاهدة شهادة السكن.
+    """
+    users_col = db.users
+    user = users_col.find_one({"username": user_username})
+    if not user:
+        return False, "المستخدم غير موجود"
+
+    balance = user.get("balance", 0)
+    amount_to_deduct = 6
+
+    if balance < amount_to_deduct:
+        return False, "رصيد العملات غير كافٍ"
+
+    new_balance = balance - amount_to_deduct
+    users_col.update_one({"_id": user["_id"]}, {"$set": {"balance": new_balance}})
+
+    return True, new_balance
+
+#====================
+
+#====================
 def save_photo_to_db(photo_file):
     try:
         data = photo_file.read()
@@ -621,19 +643,57 @@ def certificate_residence():
 
     db = get_db()
     users_col = db.users
+    username = session["user"]["username"]
 
-    user = users_col.find_one({"username": session["user"]["username"]})
+    user = users_col.find_one({"username": username})
     if not user:
         flash("❌ المستخدم غير موجود")
         return redirect(url_for("login"))
+
+    # =====================
+    # خصم 6 عملات عند مشاهدة شهادة السكن
+    # =====================
+    success, result = deduct_coins_for_certificate(username, db)
+    if not success:
+        flash(f"❌ {result}")
+        return redirect(url_for("user_page"))
 
     today = date.today().strftime("%Y/%m/%d")
 
     return render_template(
         "certificate_residence.html",
         user=user,
-        today=today
+        today=today,
+        balance_after=result  # عرض الرصيد المتبقي بعد الخصم
     )
+
+
+#####========@app.route("/transactions")
+def transactions():
+    if "user" not in session:
+        flash("❌ يجب تسجيل الدخول")
+        return redirect(url_for("login"))
+
+    db = get_db()
+    username = session["user"]["username"]
+    transactions_col = db.transactions
+
+    try:
+        # جلب كل العمليات الخاصة بالمستخدم مرتبة حسب التاريخ
+        user_transactions = list(transactions_col.find({"username": username}).sort("date", -1))
+        
+        # تحويل التاريخ إلى نص قابل للعرض
+        for t in user_transactions:
+            if "date" in t and isinstance(t["date"], datetime):
+                t["date_str"] = t["date"].strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                t["date_str"] = ""
+
+    except Exception as e:
+        print("❌ خطأ عند جلب العمليات:", e)
+        user_transactions = []
+
+    return render_template("transactions.html", transactions=user_transactions)
 
 
 
@@ -642,12 +702,3 @@ def certificate_residence():
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-
-
-
-
-
-
-
