@@ -8,6 +8,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
 
 <style>
+/* ===============================
+   عزل الصفحة بالكامل
+================================ */
+*{
+    filter:none !important;
+    backdrop-filter:none !important;
+    transform:none !important;
+}
+
 body{
     font-family:'Cairo',sans-serif;
     background:#eee;
@@ -17,46 +26,61 @@ body{
     align-items:center;
 }
 
-/* مساحة الشهادة */
+/* ===============================
+   مساحة الشهادة (بدون فوكس نهائيًا)
+================================ */
 #certificate{
     width:1000px;
     height:560px;
     position:relative;
-    background:url("/static/images/certificate_bg.jpg") no-repeat center/cover;
+
+    background-image:url("/static/images/certificate_bg.jpg");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:100% 100%;
+
+    /* منع أي تأثير موروث */
+    filter:none !important;
+    backdrop-filter:none !important;
+    transform:none !important;
+
+    /* تحسين حدة الصورة */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+
     box-shadow:0 10px 30px rgba(0,0,0,.3);
-    background-size: cover; /* تأكد من ملء الخلفية بالكامل */
 }
 
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:155px;          /* رفع الاسم بمقدار 50px */
-    left: 0;
-    right: 0;
+    top:155px;
+    left:0;
+    right:0;
     text-align:center;
     font-size:38px;
     font-weight:700;
-    color:#1b7f6a;       /* أخضر تقيل */
+    color:#1b7f6a;
     letter-spacing:1px;
 }
 
-/* ===== الرقم الوطني ===== */
+/* ===== الرقم الوطني (منزل 40px) ===== */
 .national{
     position:absolute;
-    top:215px;          /* رفع الرقم الوطني بمقدار 50px */
-    right: 260px;
+    top:255px; /* نزلناه 40px بالضبط */
+    right:260px;
     font-size:22px;
     font-weight:700;
     color:#1b7f6a;
-    direction:ltr;       /* أرقام إنجليزية */
+    direction:ltr;
     font-family:Arial, sans-serif;
 }
 
 /* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom: 95px;
-    right: 170px;
+    bottom:95px;
+    right:170px;
     font-size:18px;
     font-weight:700;
     color:#1b7f6a;
@@ -81,13 +105,8 @@ button{
 <body>
 
 <div id="certificate">
-    <!-- الاسم -->
     <div class="name">{{ user.full_name }}</div>
-
-    <!-- الرقم الوطني -->
     <div class="national">{{ user.national_id }}</div>
-
-    <!-- التاريخ -->
     <div class="date">{{ today }}</div>
 </div>
 
@@ -101,10 +120,21 @@ async function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const cert = document.getElementById("certificate");
 
-    const canvas = await html2canvas(cert,{scale:3,useCORS:true});
-    const img = canvas.toDataURL("image/png");
+    const canvas = await html2canvas(cert,{
+        scale:4,              // جودة عالية جدًا للطباعة
+        useCORS:true,
+        backgroundColor:null,
+        removeContainer:true
+    });
 
-    const pdf = new jsPDF("landscape","px",[cert.offsetWidth, cert.offsetHeight]);
+    const img = canvas.toDataURL("image/png",1.0);
+
+    const pdf = new jsPDF(
+        "landscape",
+        "px",
+        [cert.offsetWidth, cert.offsetHeight]
+    );
+
     pdf.addImage(img,"PNG",0,0,cert.offsetWidth, cert.offsetHeight);
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 }
