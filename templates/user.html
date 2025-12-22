@@ -43,6 +43,43 @@ body {
     font-weight:bold;
 }
 
+/* أزرار الخدمات */
+.services {
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+    justify-content:center;
+    margin-bottom:20px;
+}
+
+.service-btn{
+    padding:12px 20px;
+    border:none;
+    border-radius:12px;
+    background:#7a0000;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+    box-shadow:0 5px 15px rgba(0,0,0,.3);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.service-btn span {
+    font-size: 13px;
+    margin-right: 6px;
+    background: gold;
+    padding: 2px 6px;
+    border-radius: 6px;
+    color:#000;
+}
+
+.service-btn:hover{
+    transform: translateY(-3px) scale(1.05);
+    box-shadow:0 8px 25px rgba(0,0,0,.4);
+}
+
+/* ===== روابط وأزرار أخرى ===== */
 .top-actions a{
     text-decoration:none;
     margin-left:8px;
@@ -52,46 +89,19 @@ body {
     border-radius:8px;
 }
 
-/* ===== القائمة المنبثقة ===== */
-.menu{
-    position:relative;
+/* ===== رسالة الترحيب ===== */
+.welcome-msg {
+    font-size:22px;
+    color:#7a0000;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:15px;
+    animation: pulse 2s infinite;
 }
 
-.menu button{
-    padding:8px 15px;
-    border:none;
-    border-radius:8px;
-    background:#7a0000;
-    color:#fff;
-    cursor:pointer;
-}
-
-.menu-content{
-    display:none;
-    position:absolute;
-    top:40px;
-    right:0;
-    background:#fff;
-    box-shadow:0 10px 25px rgba(0,0,0,.25);
-    border-radius:10px;
-    overflow:hidden;
-    z-index:99;
-}
-
-.menu-content a{
-    display:block;
-    padding:10px 15px;
-    color:#000;
-    text-decoration:none;
-    border-bottom:1px solid #eee;
-}
-
-.menu-content a:hover{
-    background:#f2f0ec;
-}
-
-.menu:hover .menu-content{
-    display:block;
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
 }
 
 /* ===== منطقة البطاقة ===== */
@@ -103,13 +113,11 @@ body {
     transition:.3s;
 }
 
-/* إزالة الفوكس */
 #pdfArea.clear{
     filter:none;
     pointer-events:auto;
 }
 
-/* البطاقة */
 .user-card {
     position: relative;
     background: linear-gradient(145deg, #7a0000, #a00000);
@@ -117,11 +125,11 @@ body {
     padding: 20px;
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
     box-shadow: 0 15px 30px rgba(0,0,0,.4);
     overflow: hidden;
 }
 
-/* شعار مائي */
 .user-card::after {
     content: "";
     position: absolute;
@@ -182,10 +190,12 @@ body {
     color: #fff;
     flex: 1;
     z-index: 3;
+    min-width: 180px;
 }
 
 .user-info h2 {
     margin: 0 0 8px;
+    font-size: 22px;
 }
 
 .user-info p {
@@ -222,7 +232,6 @@ body {
     margin: 0;
 }
 
-/* أزرار التحكم */
 .control-buttons{
     margin-top:20px;
     display:flex;
@@ -243,6 +252,47 @@ body {
 .download-btn{
     display:none;
 }
+
+/* ===== سجل العمليات ===== */
+.transactions-container {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 30px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    overflow: hidden;
+}
+
+.transactions-container h3 {
+    background: #7a0000;
+    color: #fff;
+    margin: 0;
+    padding: 12px;
+    text-align: center;
+}
+
+.transactions-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.transactions-container th, 
+.transactions-container td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.transactions-container th {
+    background: #f8f8f8;
+    color: #333;
+    font-weight: bold;
+}
+
+.transactions-container tr:hover {
+    background: #f2f2f2;
+}
 </style>
 </head>
 
@@ -252,16 +302,7 @@ body {
 <div class="top-bar">
 
     <div class="balance-box">
-        💰 رصيدك: <span id="balance">20</span> عملة
-    </div>
-
-    <div class="menu">
-        <button>الخدمات</button>
-        <div class="menu-content">
-            <a href="/worldcup">🏆 مشاهدة كأس العالم 2026</a>
-            <a href="/certificate/residence">🏠 شهادة سكن</a>
-            <a href="#">🎓 شهادة مدرسية</a>
-        </div>
+        💰 رصيدك: <span id="balance">0</span> عملة
     </div>
 
     <div class="top-actions">
@@ -271,8 +312,20 @@ body {
 
 </div>
 
-<div id="pdfArea">
+<!-- رسالة الترحيب -->
+<div class="welcome-msg">
+    🎉 أهلاً وسهلاً بك، {{ user.full_name }}! نتمنى لك تجربة رائعة في نادي مديسيسة 🎉
+</div>
 
+<!-- خدمات جذابة -->
+<div class="services">
+    <button class="service-btn">🏠 شهادة السكن <span>6</span></button>
+    <button class="service-btn">🏆 مشاهدة كأس العالم <span>4</span></button>
+    <button class="service-btn">🎓 شهادة مدرسية <span>10</span></button>
+</div>
+
+<!-- البطاقة نفسها فقط (لتحميل PDF) -->
+<div id="pdfArea">
     <div class="user-card">
         <div class="logo-top"></div>
 
@@ -313,37 +366,72 @@ body {
     <button class="download-btn" id="downloadBtn" onclick="downloadPDF()">تحميل البطاقة PDF</button>
 </div>
 
+<!-- سجل العمليات للعرض فقط -->
+<div class="transactions-container">
+    <h3>سجل العمليات الأخيرة</h3>
+    <table id="transactionsTable">
+        <thead>
+            <tr>
+                <th>التاريخ</th>
+                <th>النوع</th>
+                <th>المبلغ</th>
+                <th>السبب</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
+// بيانات الخدمات مع التكلفة
+const servicesData = {
+    "🏠 شهادة السكن": 6,
+    "🏆 مشاهدة كأس العالم": 4,
+    "🎓 شهادة مدرسية": 10
+};
+
 async function fetchUserData() {
     try {
-        // جلب بيانات المستخدم من السيرفر (يمكن تعديل endpoint ليعيد balance وpdfCleared)
-        const res = await fetch("/user_data"); // هذا endpoint تحتاج تضيفه في Flask
+        const res = await fetch("/user_data");
         const data = await res.json();
+
         document.getElementById("balance").innerText = data.balance;
 
-        if (data.pdfCleared) {
+        if(data.pdfCleared){
             document.getElementById("pdfArea").classList.add("clear");
             document.getElementById("downloadBtn").style.display = "inline-block";
         }
-    } catch (err) {
+
+        // تعبئة سجل العمليات
+        if(data.transactions && data.transactions.length>0){
+            const tbody = document.getElementById("transactionsTable").querySelector("tbody");
+            tbody.innerHTML = "";
+            data.transactions.forEach(t=>{
+                const tr = document.createElement("tr");
+                tr.innerHTML = `<td>${t.date_str||''}</td><td>${t.type||''}</td><td>${t.amount||''}</td><td>${t.reason||''}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+    } catch(err){
         console.error("خطأ عند جلب بيانات المستخدم:", err);
     }
 }
 
-async function removeBlur() {
+async function removeBlur(){
     try {
-        const res = await fetch("/remove_focus", { method: "POST" });
+        const res = await fetch("/remove_focus",{method:"POST"});
         const data = await res.json();
-
-        if (data.status === "success") {
-            document.getElementById("balance").innerText = data.new_balance;
+        if(data.status==="success"){
+            document.getElementById("balance").innerText=data.new_balance;
             document.getElementById("pdfArea").classList.add("clear");
-            document.getElementById("downloadBtn").style.display = "inline-block";
+            document.getElementById("downloadBtn").style.display="inline-block";
         } else {
             alert(data.msg);
         }
-    } catch (err) {
+    } catch(err){
         alert("❌ حدث خطأ، حاول مرة أخرى");
     }
 }
@@ -359,15 +447,40 @@ async function downloadPDF(){
     pdf.save('بطاقة_عضو_رسمية.pdf');
 }
 
-// عند تحميل الصفحة
-document.addEventListener("DOMContentLoaded", fetchUserData);
+// إضافة تأثير الدفع عند الضغط على خدمات الرصيد
+document.addEventListener("DOMContentLoaded", () => {
+    fetchUserData();
+
+    const serviceButtons = document.querySelectorAll(".service-btn");
+    serviceButtons.forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const serviceName = btn.textContent.replace(/\d+/g,'').trim();
+            const cost = servicesData[serviceName];
+
+            if(confirm(`🔔 هل ترغب باستخدام ${cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
+                try {
+                    const res = await fetch("/pay_service", {
+                        method: "POST",
+                        headers: {"Content-Type":"application/json"},
+                        body: JSON.stringify({service: serviceName})
+                    });
+                    const data = await res.json();
+
+                    if(data.status==="success"){
+                        document.getElementById("balance").innerText = data.new_balance;
+                        alert(`✅ تم خصم ${cost} عملة رقمية بنجاح للحصول على "${serviceName}"!`);
+                    } else {
+                        alert(`❌ فشل العملية: ${data.msg}`);
+                    }
+
+                } catch(err){
+                    alert("❌ حدث خطأ أثناء عملية الدفع، حاول مرة أخرى.");
+                    console.error(err);
+                }
+            }
+        });
+    });
+});
 </script>
-
-
-
 </body>
 </html>
-
-
-
-
