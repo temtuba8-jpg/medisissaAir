@@ -5,7 +5,7 @@
 <title>شهادة سكن</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700&display=swap" rel="stylesheet">
 
 <style>
 body{
@@ -19,41 +19,48 @@ body{
 
 /* مساحة الشهادة */
 #certificate{
-    width: 1000px;
-    height: 560px;
-    position: relative;
-    background: url("/static/images/certificate_bg.jpg") no-repeat center/cover;
+    width:1000px;
+    height:560px;
+    position:relative;
+    background:url("/static/images/certificate_bg.jpg") no-repeat center/cover;
     box-shadow:0 10px 30px rgba(0,0,0,.3);
 }
 
-/* الاسم */
+/* ===== الاسم ===== */
 .name{
     position:absolute;
-    top: 215px;   /* عدلها إذا لزم */
+    top: 205px;          /* مكان Name & Surname */
     left: 0;
     right: 0;
     text-align:center;
-    font-size:36px;
-    color:#1f8f7a;
+    font-size:38px;
     font-weight:700;
+    color:#1b7f6a;       /* أخضر تقيل */
+    letter-spacing:1px;
 }
 
-/* الرقم الوطني */
+/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top: 270px;  /* عدلها */
+    top: 265px;          /* مكان النقاط للرقم الوطني */
     right: 260px;
-    font-size:18px;
-    color:#333;
+    font-size:22px;
+    font-weight:700;
+    color:#1b7f6a;
+    direction:ltr;       /* أرقام إنجليزية */
+    font-family:Arial, sans-serif;
 }
 
-/* التاريخ */
+/* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom: 95px;
+    bottom: 95px;        /* مكان التاريخ */
     right: 170px;
-    font-size:16px;
-    color:#333;
+    font-size:18px;
+    font-weight:700;
+    color:#1b7f6a;
+    direction:ltr;
+    font-family:Arial, sans-serif;
 }
 
 /* زر */
@@ -62,9 +69,10 @@ button{
     padding:12px 25px;
     border:none;
     border-radius:10px;
-    background:#1f8f7a;
+    background:#1b7f6a;
     color:#fff;
     cursor:pointer;
+    font-size:16px;
 }
 </style>
 </head>
@@ -72,8 +80,13 @@ button{
 <body>
 
 <div id="certificate">
+    <!-- الاسم -->
     <div class="name">{{ user.full_name }}</div>
+
+    <!-- الرقم الوطني -->
     <div class="national">{{ user.national_id }}</div>
+
+    <!-- التاريخ -->
     <div class="date">{{ today }}</div>
 </div>
 
@@ -92,7 +105,7 @@ async function downloadPDF(){
 
     const pdf = new jsPDF("landscape","px",[cert.offsetWidth, cert.offsetHeight]);
     pdf.addImage(img,"PNG",0,0,cert.offsetWidth, cert.offsetHeight);
-    pdf.save("شهادة_سكن.pdf");
+    pdf.save("شهادة_سكن_مديسيسة.pdf");
 }
 </script>
 
