@@ -650,13 +650,16 @@ def certificate_residence():
         flash("❌ المستخدم غير موجود")
         return redirect(url_for("login"))
 
-    # =====================
     # خصم 6 عملات عند مشاهدة شهادة السكن
-    # =====================
     success, result = deduct_coins_for_certificate(username, db)
+    
     if not success:
-        flash(f"❌ {result}")
-        return redirect(url_for("user_page"))
+        # بدل إعادة التوجيه، نعرض رسالة الخطأ في صفحة المستخدم
+        return render_template(
+            "user.html",
+            user=user,
+            error_message=f"❌ {result}",  # رسالة الخطأ هنا
+        )
 
     today = date.today().strftime("%Y/%m/%d")
 
@@ -666,6 +669,7 @@ def certificate_residence():
         today=today,
         balance_after=result  # عرض الرصيد المتبقي بعد الخصم
     )
+
 
 
 #####========@app.route("/transactions")
@@ -696,9 +700,24 @@ def transactions():
     return render_template("transactions.html", transactions=user_transactions)
 
 
+#==================
+@app.route("/deduct_certificate_coins", methods=["POST"])
+def deduct_certificate_coins():
+    if "user" not in session:
+        return {"status": "error", "msg": "❌ يجب تسجيل الدخول"}, 401
+
+    db = get_db()
+    username = session["user"]["username"]
+    success, result = deduct_coins_for_certificate(username, db)
+
+    if not success:
+        return {"status": "error", "msg": result}, 400
+
+    return {"status": "success", "new_balance": result}
 
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
