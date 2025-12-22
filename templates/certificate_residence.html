@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>شهادة سكن</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
 
@@ -23,44 +22,30 @@ body{
     align-items:center;
 }
 
-/* ===== تنبيه ===== */
-.notice{
-    width:1000px;
-    margin-bottom:12px;
-    padding:12px 18px;
-    background:#fff3cd;
-    color:#856404;
-    border:1px solid #ffeeba;
-    border-radius:10px;
-    font-size:15px;
-    font-weight:600;
-    text-align:center;
-}
-
 /* ===== الشهادة ===== */
 #certificate{
     width:1000px;
     height:560px;
     position:relative;
     overflow:hidden;
-    box-shadow:0 10px 30px rgba(0,0,0,.3);
+    background:#fff;
 }
 
-/* ===== الخلفية (حل الفوكس النهائي) ===== */
+/* ===== الخلفية (بدون أي إعادة تحجيم) ===== */
 #certificate img.bg{
     position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:fill;
-    image-rendering:auto;
+    top:0;
+    left:0;
+    width:1000px;
+    height:560px;
+    image-rendering:pixelated;
     pointer-events:none;
 }
 
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:175px;   /* ↓ نازل 20px */
+    top:175px;
     left:0;
     right:0;
     text-align:center;
@@ -68,14 +53,14 @@ body{
     font-weight:600;
     color:#1b7f6a;
     direction:rtl;
-    unicode-bidi:plaintext;
+    unicode-bidi:isolate;
 }
 
-/* ===== الرقم الوطني ===== */
+/* ===== الرقم الوطني (تحريك 200px شمال) ===== */
 .national{
     position:absolute;
-    top:270px;  /* ↓ نازل 15px */
-    right:260px;
+    top:270px;
+    right:460px; /* ← كان 260 | الآن 460 */
     font-size:22px;
     font-weight:600;
     color:#1b7f6a;
@@ -110,16 +95,9 @@ button{
 
 <body>
 
-<div class="notice" id="notice">
-⚠️ تنبيه: هذه الشهادة غير معتمدة حتى يتم ختمها والتوقيع عليها من رئيس اللجنة بالقرية.
-يرجى طباعتها وإحضارها لرئيسة اللجنة لاعتمادها رسميًا.
-</div>
-
 <div id="certificate">
-    <!-- الخلفية -->
-    <img src="/static/images/certificate_bg.jpg" class="bg" crossorigin="anonymous">
+    <img src="/static/images/certificate_bg.jpg" class="bg">
 
-    <!-- البيانات -->
     <div class="name" id="name">{{ user.full_name }}</div>
     <div class="national" id="nid">{{ user.national_id }}</div>
     <div class="date" id="date">{{ today }}</div>
@@ -133,20 +111,15 @@ button{
 <script>
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
-
     const cert = document.getElementById("certificate");
-    const name = document.getElementById("name").innerText;
-    const nid  = document.getElementById("nid").innerText;
-    const date = document.getElementById("date").innerText;
 
-    document.getElementById("notice").style.display = "none";
-    document.getElementById("name").style.visibility = "hidden";
-    document.getElementById("nid").style.visibility  = "hidden";
-    document.getElementById("date").style.visibility = "hidden";
+    // إخفاء النص (سنكتبه Vector)
+    name.style.visibility = nid.style.visibility = date.style.visibility = "hidden";
 
     const canvas = await html2canvas(cert,{
-        scale:5,
-        useCORS:true
+        scale:1,
+        useCORS:true,
+        backgroundColor:"#fff"
     });
 
     const img = canvas.toDataURL("image/png",1.0);
@@ -158,20 +131,17 @@ async function downloadPDF(){
     pdf.setFont("Helvetica","bold");
 
     pdf.setFontSize(38);
-    pdf.text(name, 500, 200, { align:"center" });
+    pdf.text(name.innerText, 500, 200, { align:"center" });
 
     pdf.setFontSize(22);
-    pdf.text(nid, 740, 305);
+    pdf.text(nid.innerText, 540, 305); // متوافق مع الإزاحة
 
     pdf.setFontSize(18);
-    pdf.text(date, 830, 480);
+    pdf.text(date.innerText, 830, 480);
 
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    document.getElementById("notice").style.display = "block";
-    document.getElementById("name").style.visibility = "visible";
-    document.getElementById("nid").style.visibility  = "visible";
-    document.getElementById("date").style.visibility = "visible";
+    name.style.visibility = nid.style.visibility = date.style.visibility = "visible";
 }
 </script>
 
