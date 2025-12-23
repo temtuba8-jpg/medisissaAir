@@ -673,16 +673,24 @@ def certificate_residence():
         flash("❌ المستخدم غير موجود")
         return redirect(url_for("login"))
 
-    # خصم 6 عملات عند مشاهدة شهادة السكن
-    success, result = deduct_coins_for_certificate(username, db)
-    
-    if not success:
-        # بدل إعادة التوجيه، نعرض رسالة الخطأ في صفحة المستخدم
-        return render_template(
-            "user.html",
-            user=user,
-            error_message=f"❌ {result}",  # رسالة الخطأ هنا
-        )
+    # =============================
+    # خصم 6 عملات مرة واحدة فقط
+    # =============================
+    if not session.get("residence_certificate_paid"):
+        success, result = deduct_coins_for_certificate(username, db)
+
+        if not success:
+            return render_template(
+                "user.html",
+                user=user,
+                error_message=f"❌ {result}"
+            )
+
+        # حفظ أن الخصم تم
+        session["residence_certificate_paid"] = True
+
+        # تحديث الرصيد في بيانات المستخدم
+        user["balance"] = result
 
     today = date.today().strftime("%Y/%m/%d")
 
@@ -690,9 +698,8 @@ def certificate_residence():
         "certificate_residence.html",
         user=user,
         today=today,
-        balance_after=result  # عرض الرصيد المتبقي بعد الخصم
+        balance_after=user.get("balance")
     )
-
 
 
 #####========@app.route("/transactions")
@@ -724,54 +731,40 @@ def transactions():
 
 
 #==================
-@app.route("/deduct_certificate_coins", methods=["POST"])
-def deduct_certificate_coins():
+========
+@app.route("/pay_service", methods=["POST"])
+def pay_service():
     if "user" not in session:
-        return {"status": "error", "msg": "❌ يجب تسجيل الدخول"}, 401
+        return {"status":"error","msg":"❌ يجب تسجيل الدخول"}, 401
+
+    data = request.get_json()
+    service_name = data.get("service")
 
     db = get_db()
     username = session["user"]["username"]
-    success, result = deduct_coins_for_certificate(username, db)
+
+    success, result = deduct_coins_for_service(username, db, service_name)
 
     if not success:
-        return {"status": "error", "msg": result}, 400
+        return {"status":"error","msg": result}, 400
 
-    return {"status": "success", "new_balance": result}
+    # تحديد صفحة التحويل
+    redirect_map = {
+        "🏠 شهادة السكن": "/certificate/residence",
+        "🏆 مشاهدة كأس العالم": "/worldcup",
+        "🎓 شهادة مدرسية": "/certificate/school"
+    }
 
-#===============
-serviceButtons.forEach(btn => {
-    btn.addEventListener("click", async () => {
-        const serviceName = btn.textContent.replace(/\d+/g,'').trim();
-
-        if(!servicesData[serviceName]) return;
-
-        if(confirm(`🔔 هل ترغب باستخدام ${servicesData[serviceName].cost} عملة رقمية للحصول على خدمة "${serviceName}"؟`)) {
-            try {
-                const res = await fetch("/pay_service", {
-                    method: "POST",
-                    headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({service: serviceName})
-                });
-                const data = await res.json();
-
-                if(data.status==="success"){
-                    document.getElementById("balance").innerText = data.new_balance;
-                    window.location.href = data.redirect_url; // تحويل المستخدم للصفحة المطلوبة
-                } else {
-                    alert(data.msg); // تنبيه إذا الرصيد غير كافٍ
-                }
-
-            } catch(err){
-                alert("❌ حدث خطأ أثناء عملية الدفع، حاول مرة أخرى.");
-                console.error(err);
-            }
-        }
-    });
-});
+    return {
+        "status": "success",
+        "new_balance": result,
+        "redirect_url": redirect_map.get(service_name, "/user")
+    }
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
