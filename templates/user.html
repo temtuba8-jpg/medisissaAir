@@ -455,7 +455,12 @@ document.addEventListener("DOMContentLoaded", () => {
     serviceButtons.forEach(btn => {
         btn.addEventListener("click", async () => {
             // استخراج اسم الخدمة بدون الرقم داخل span
-            const serviceName = btn.childNodes[0].textContent.trim();
+            const serviceName = Array.from(btn.childNodes)
+                .filter(node => node.nodeType === Node.TEXT_NODE)
+                .map(node => node.textContent)
+                .join("")
+                .trim();
+
             const service = servicesData[serviceName];
 
             if(!service) {
@@ -475,7 +480,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     if(data.status==="success"){
                         document.getElementById("balance").innerText = data.new_balance;
                         alert(`✅ تم خصم ${service.cost} عملة رقمية بنجاح للحصول على "${serviceName}"!`);
-                        // تحويل المستخدم للصفحة المطلوبة
+                        // تحويل المستخدم للصفحة الخاصة بالخدمة بعد الخصم مباشرة
                         window.location.href = service.url;
                     } else {
                         alert(`❌ فشل العملية: ${data.msg}`);
