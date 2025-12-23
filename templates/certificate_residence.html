@@ -22,7 +22,6 @@ body{
     align-items:center;
 }
 
-/* ===== تنبيه فوق الشهادة ===== */
 #alert-msg {
     max-width:1000px;
     width:100%;
@@ -37,7 +36,6 @@ body{
     box-sizing:border-box;
 }
 
-/* ===== الشهادة ===== */
 #certificate{
     width:1000px;
     max-width:100%;
@@ -49,7 +47,6 @@ body{
     box-sizing:border-box;
 }
 
-/* ===== الخلفية ===== */
 #certificate img.bg{
     position:absolute;
     top:0;
@@ -60,10 +57,9 @@ body{
     pointer-events:none;
 }
 
-/* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:206px;
+    top:201px; /* رفع 5px */
     left:0;
     right:0;
     text-align:center;
@@ -72,10 +68,9 @@ body{
     color:#1b7f6a;
 }
 
-/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:296px;
+    top:291px; /* رفع 5px */
     right:520px;
     font-size:22px;
     font-weight:600;
@@ -84,7 +79,6 @@ body{
     font-family:Arial, sans-serif;
 }
 
-/* ===== التاريخ ===== */
 .date{
     position:absolute;
     bottom:320px;
@@ -96,7 +90,6 @@ body{
     font-family:Arial, sans-serif;
 }
 
-/* ===== زر التحميل ===== */
 button{
     margin-top:20px;
     padding:12px 25px;
@@ -108,7 +101,6 @@ button{
     font-size:16px;
 }
 
-/* ===== استجابة الأجهزة ===== */
 @media(max-width:768px){
     .name{
         font-size:28px;
@@ -162,16 +154,11 @@ async function downloadPDF(){
     const nid  = document.getElementById("nid");
     const date = document.getElementById("date");
 
-    // إخفاء الاسم والرقم الوطني والتاريخ أثناء أخذ الصورة لتجنب التكرار
-    name.style.visibility = "hidden";
-    nid.style.visibility  = "hidden";
-    date.style.visibility = "hidden";
-
-    // إخفاء التنبيه
+    // إخفاء التنبيه أثناء أخذ الصورة
     const alertMsg = document.getElementById("alert-msg");
     alertMsg.style.display = "none";
 
-    // التقاط الشهادة بدقة عالية جدًا
+    // التقاط الشهادة بدقة عالية
     const canvas = await html2canvas(cert, {
         scale:4,
         useCORS:true,
@@ -189,30 +176,27 @@ async function downloadPDF(){
     // إضافة صورة الشهادة
     pdf.addImage(imgData, "PNG", 0, 0, 1000, 560);
 
-    // كتابة النصوص Vector مرة واحدة فقط
+    // كتابة النصوص Vector مرة واحدة فقط داخل حدود PDF
     pdf.setTextColor(27,127,106);
     pdf.setFont("Helvetica","bold");
 
     pdf.setFontSize(38);
-    pdf.text(name.innerText, 500, 245, { align:"center" });
+    pdf.text(name.innerText, 500, 201, { align:"center" }); // رفع الاسم 5px
 
     pdf.setFontSize(22);
-    pdf.text(nid.innerText, 540, 325);
+    pdf.text(nid.innerText, 540, 291); // رفع الرقم الوطني 5px
 
     pdf.setFontSize(18);
-    // تحريك التاريخ 400px للأسفل و100px للشمال
-    pdf.text(date.innerText, 830, 640); // 930 - 100 = 830 لتحريك 100px للشمال
+    pdf.text(date.innerText, 430, 560); // التاريخ 400px للأسفل + 100px للشمال داخل حدود PDF
 
     // تحميل PDF
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    // إعادة عرض الاسم والرقم الوطني والتاريخ والتنبيه
-    name.style.visibility = "visible";
-    nid.style.visibility  = "visible";
-    date.style.visibility = "visible";
+    // إعادة عرض التنبيه
     alertMsg.style.display = "block";
 }
 </script>
+
 
 </body>
 </html>
