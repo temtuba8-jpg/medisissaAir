@@ -22,6 +22,19 @@ body{
     align-items:center;
 }
 
+/* ===== تنبيه فوق الشهادة ===== */
+#alert-msg {
+    width:1000px;
+    background:#ffeb3b;
+    color:#000;
+    font-weight:bold;
+    text-align:center;
+    padding:10px;
+    margin-bottom:15px;
+    border-radius:8px;
+    font-size:16px;
+}
+
 /* ===== الشهادة ===== */
 #certificate{
     width:1000px;   /* العرض */
@@ -45,7 +58,7 @@ body{
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:210px;
+    top:200px; /* رفع 10px */
     left:0;
     right:0;
     text-align:center;
@@ -57,7 +70,7 @@ body{
 /* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:300px;
+    top:290px; /* رفع 10px */
     right:520px;
     font-size:22px;
     font-weight:600;
@@ -69,8 +82,8 @@ body{
 /* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom:80px;
-    right:180px;
+    bottom:70px; /* رفع 10px */
+    right:30px;  /* تحريك 150px شمالاً */
     font-size:18px;
     font-weight:600;
     color:#1b7f6a;
@@ -92,6 +105,11 @@ button{
 </head>
 
 <body>
+
+<!-- التنبيه فوق الشهادة -->
+<div id="alert-msg">
+🔔 التحذير: الشهادة لا تعتمد رسمياً إلا بعد توقيع رئيس اللجنة عليها. يرجى تنزيلها وطباعتها ملونة وإحضارها لرئيس اللجنة لاعتمادها.
+</div>
 
 <div id="certificate">
     <img src="/static/images/certificate_bg.jpg" class="bg">
