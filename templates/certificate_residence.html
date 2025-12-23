@@ -63,7 +63,7 @@ body{
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:206px; /* رفع 6px */
+    top:206px;
     left:0;
     right:0;
     text-align:center;
@@ -75,7 +75,7 @@ body{
 /* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:296px; /* رفع 6px */
+    top:296px;
     right:520px;
     font-size:22px;
     font-weight:600;
@@ -87,8 +87,8 @@ body{
 /* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom:320px; /* رفع 250px */
-    right:530px;  /* تحريك 500px يمين */
+    bottom:320px;
+    right:530px;
     font-size:18px;
     font-weight:600;
     color:#1b7f6a;
@@ -137,14 +137,12 @@ button{
 
 <body>
 
-<!-- التنبيه فوق الشهادة -->
 <div id="alert-msg">
 🔔 التحذير: الشهادة لا تعتمد رسمياً إلا بعد توقيع رئيس اللجنة عليها. يرجى تنزيلها وطباعتها ملونة وإحضارها لرئيس اللجنة لاعتمادها.
 </div>
 
 <div id="certificate">
     <img src="/static/images/certificate_bg.jpg" class="bg">
-
     <div class="name" id="name">{{ user.full_name }}</div>
     <div class="national" id="nid">{{ user.national_id }}</div>
     <div class="date" id="date">{{ today }}</div>
@@ -164,18 +162,23 @@ async function downloadPDF(){
     const nid  = document.getElementById("nid");
     const date = document.getElementById("date");
 
-    // إخفاء التنبيه فقط أثناء التحميل
+    // إخفاء الاسم والرقم الوطني والتاريخ أثناء أخذ الصورة لتجنب التكرار
+    name.style.visibility = "hidden";
+    nid.style.visibility  = "hidden";
+    date.style.visibility = "hidden";
+
+    // إخفاء التنبيه
     const alertMsg = document.getElementById("alert-msg");
     alertMsg.style.display = "none";
 
-    // التقاط الشهادة بدقة عالية جداً
-    const canvas = await html2canvas(cert,{
-        scale:4, // جودة عالية جدًا
+    // التقاط الشهادة بدقة عالية جدًا
+    const canvas = await html2canvas(cert, {
+        scale:4,
         useCORS:true,
         backgroundColor:"#fff"
     });
 
-    const imgData = canvas.toDataURL("image/png",1.0);
+    const imgData = canvas.toDataURL("image/png", 1.0);
 
     const pdf = new jsPDF({
         orientation:"landscape",
@@ -184,9 +187,9 @@ async function downloadPDF(){
     });
 
     // إضافة صورة الشهادة
-    pdf.addImage(imgData,"PNG",0,0,1000,560);
+    pdf.addImage(imgData, "PNG", 0, 0, 1000, 560);
 
-    // كتابة النصوص Vector لضمان وضوحها
+    // كتابة النصوص Vector مرة واحدة فقط
     pdf.setTextColor(27,127,106);
     pdf.setFont("Helvetica","bold");
 
@@ -197,12 +200,16 @@ async function downloadPDF(){
     pdf.text(nid.innerText, 540, 325);
 
     pdf.setFontSize(18);
-    pdf.text(date.innerText, 1030, 240);
+    // تحريك التاريخ 400px للأسفل و100px للشمال
+    pdf.text(date.innerText, 830, 640); // 930 - 100 = 830 لتحريك 100px للشمال
 
     // تحميل PDF
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    // إعادة عرض التنبيه
+    // إعادة عرض الاسم والرقم الوطني والتاريخ والتنبيه
+    name.style.visibility = "visible";
+    nid.style.visibility  = "visible";
+    date.style.visibility = "visible";
     alertMsg.style.display = "block";
 }
 </script>
