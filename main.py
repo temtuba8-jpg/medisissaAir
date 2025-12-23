@@ -44,7 +44,8 @@ def get_db():
 
 # =====================
 # Helpers
-# =====================def deduct_coins_for_certificate(user_username, db):
+# =====================
+def deduct_coins_for_certificate(user_username, db):
     """
     تخصم 6 عملات من المستخدم عند مشاهدة شهادة السكن.
     """
@@ -702,7 +703,8 @@ def certificate_residence():
     )
 
 
-#####========@app.route("/transactions")
+#####========
+@app.route("/transactions")
 def transactions():
     if "user" not in session:
         flash("❌ يجب تسجيل الدخول")
@@ -731,7 +733,7 @@ def transactions():
 
 
 #==================
-========
+
 @app.route("/pay_service", methods=["POST"])
 def pay_service():
     if "user" not in session:
@@ -765,6 +767,7 @@ def pay_service():
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
