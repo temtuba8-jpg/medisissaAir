@@ -9,176 +9,7 @@
 <style>
 *{
     filter:none !important;
-    backdrop-filter:none !important;<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<title>شهادة سكن</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">  
-
-<style>
-*{
-    filter:none !important;
     backdrop-filter:none !important;
-    transform:none !important;
-}
-
-body{
-    font-family:'Cairo',sans-serif;
-    background:#eee;
-    padding:30px;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-}
-
-/* ===== الشهادة بحجم الصورة الأصلية ===== */
-#certificate{
-    width:397px;
-    height:276px;
-    position:relative;
-    overflow:hidden;
-    background:#fff;
-}
-
-/* ===== الخلفية ===== */
-#certificate img.bg{
-    position:absolute;
-    top:0;
-    left:0;
-    width:397px;
-    height:276px;
-    image-rendering:auto;
-    pointer-events:none;
-}
-
-/* ===== الاسم ===== */
-.name{
-    position:absolute;
-    top:175px;   /* نازل 20px */
-    left:0;
-    right:0;
-    text-align:center;
-    font-size:38px;
-    font-weight:600;
-    color:#1b7f6a;
-    direction:rtl;
-    unicode-bidi:isolate;
-}
-
-/* ===== الرقم الوطني ===== */
-.national{
-    position:absolute;
-    top:270px;  /* نازل 15px */
-    right:460px; /* تحريك شمال 200px */
-    font-size:22px;
-    font-weight:600;
-    color:#1b7f6a;
-    direction:ltr;
-    font-family:Arial, sans-serif;
-}
-
-/* ===== التاريخ ===== */
-.date{
-    position:absolute;
-    bottom:95px;
-    right:170px;
-    font-size:18px;
-    font-weight:600;
-    color:#1b7f6a;
-    direction:ltr;
-    font-family:Arial, sans-serif;
-}
-
-button{
-    margin-top:20px;
-    padding:12px 25px;
-    border:none;
-    border-radius:10px;
-    background:#1b7f6a;
-    color:#fff;
-    cursor:pointer;
-    font-size:16px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="certificate">
-    <img src="/static/images/certificate_bg.jpg" class="bg">
-
-    <div class="name" id="name">{{ user.full_name }}</div>
-    <div class="national" id="nid">{{ user.national_id }}</div>
-    <div class="date" id="date">{{ today }}</div>
-</div>
-
-<button onclick="downloadPDF()">تحميل الشهادة PDF</button>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<script>
-async function downloadPDF(){
-    const { jsPDF } = window.jspdf;
-    const cert = document.getElementById("certificate");
-
-    // إخفاء النصوص مؤقتًا
-    const name = document.getElementById("name");
-    const nid  = document.getElementById("nid");
-    const date = document.getElementById("date");
-
-    name.style.visibility = nid.style.visibility = date.style.visibility = "hidden";
-
-    // تصوير الخلفية
-    const canvas = await html2canvas(cert,{
-        scale:1,
-        useCORS:true,
-        backgroundColor:"#fff"
-    });
-
-    const img = canvas.toDataURL("image/png",1.0);
-
-    // إنشاء PDF بالحجم نفسه
-    const pdf = new jsPDF("landscape","px",[397,276]);
-    pdf.addImage(img,"PNG",0,0,397,276);
-
-    // كتابة النصوص داخل PDF (Vector)
-    pdf.setTextColor(27,127,106);
-    pdf.setFont("Helvetica","bold");
-
-    pdf.setFontSize(38);
-    pdf.text(name.innerText, 198, 200, { align:"center" });
-
-    pdf.setFontSize(22);
-    pdf.text(nid.innerText, 280, 305); // متوافق مع الإزاحة
-
-    pdf.setFontSize(18);
-    pdf.text(date.innerText, 330, 230);
-
-    pdf.save("شهادة_سكن_مديسيسة.pdf");
-
-    // إعادة النصوص للعرض
-    name.style.visibility = nid.style.visibility = date.style.visibility = "visible";
-
-    // ===== خصم 6 عملات =====
-    fetch('/deduct_coins', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: '{{ user.id }}', amount: 6 })
-    })
-    .then(res => res.json())
-    .then(data => {
-        console.log("تم خصم 6 عملات:", data);
-    })
-    .catch(err => console.error(err));
-}
-</script>
-
-</body>
-</html>
-
     transform:none !important;
 }
 
@@ -193,43 +24,41 @@ body{
 
 /* ===== الشهادة ===== */
 #certificate{
-    width:1000px;
-    height:560px;
+    width:1000px;   /* العرض */
+    height:560px;   /* الطول */
     position:relative;
     overflow:hidden;
     background:#fff;
 }
 
-/* ===== الخلفية (بدون أي إعادة تحجيم) ===== */
+/* ===== الخلفية ===== */
 #certificate img.bg{
     position:absolute;
     top:0;
     left:0;
     width:1000px;
     height:560px;
-    image-rendering:pixelated;
+    object-fit:cover;
     pointer-events:none;
 }
 
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:175px;
+    top:210px;
     left:0;
     right:0;
     text-align:center;
     font-size:38px;
     font-weight:600;
     color:#1b7f6a;
-    direction:rtl;
-    unicode-bidi:isolate;
 }
 
-/* ===== الرقم الوطني (تحريك 200px شمال) ===== */
+/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:270px;
-    right:460px; /* ← كان 260 | الآن 460 */
+    top:300px;
+    right:520px;
     font-size:22px;
     font-weight:600;
     color:#1b7f6a;
@@ -240,8 +69,8 @@ body{
 /* ===== التاريخ ===== */
 .date{
     position:absolute;
-    bottom:95px;
-    right:170px;
+    bottom:80px;
+    right:180px;
     font-size:18px;
     font-weight:600;
     color:#1b7f6a;
@@ -280,10 +109,16 @@ button{
 <script>
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
-    const cert = document.getElementById("certificate");
 
-    // إخفاء النص (سنكتبه Vector)
-    name.style.visibility = nid.style.visibility = date.style.visibility = "hidden";
+    const cert = document.getElementById("certificate");
+    const name = document.getElementById("name");
+    const nid  = document.getElementById("nid");
+    const date = document.getElementById("date");
+
+    /* إخفاء النص مؤقتًا */
+    name.style.visibility =
+    nid.style.visibility  =
+    date.style.visibility = "hidden";
 
     const canvas = await html2canvas(cert,{
         scale:1,
@@ -291,26 +126,35 @@ async function downloadPDF(){
         backgroundColor:"#fff"
     });
 
-    const img = canvas.toDataURL("image/png",1.0);
+    const imgData = canvas.toDataURL("image/png",1.0);
 
-    const pdf = new jsPDF("landscape","px",[1000,560]);
-    pdf.addImage(img,"PNG",0,0,1000,560);
+    const pdf = new jsPDF({
+        orientation:"landscape",
+        unit:"px",
+        format:[1000,560]
+    });
 
+    pdf.addImage(imgData,"PNG",0,0,1000,560);
+
+    /* كتابة النصوص Vector */
     pdf.setTextColor(27,127,106);
     pdf.setFont("Helvetica","bold");
 
     pdf.setFontSize(38);
-    pdf.text(name.innerText, 500, 200, { align:"center" });
+    pdf.text(name.innerText, 500, 245, { align:"center" });
 
     pdf.setFontSize(22);
-    pdf.text(nid.innerText, 540, 305); // متوافق مع الإزاحة
+    pdf.text(nid.innerText, 540, 325);
 
     pdf.setFontSize(18);
-    pdf.text(date.innerText, 830, 480);
+    pdf.text(date.innerText, 820, 490);
 
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    name.style.visibility = nid.style.visibility = date.style.visibility = "visible";
+    /* إعادة النص */
+    name.style.visibility =
+    nid.style.visibility  =
+    date.style.visibility = "visible";
 }
 </script>
 
