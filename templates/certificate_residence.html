@@ -60,12 +60,18 @@ body{
 
 .header .state{ font-size:24px; font-weight:700; }
 .header .committee{ font-size:22px; margin-top:5px; }
-.header .title{ font-size:42px; font-weight:900; margin-top:10px; }
 
-/* ===== الاسم (مرفوع 10px) ===== */
+/* ===== تم تعديلها فقط ===== */
+.header .title{
+    font-size:40px;      /* كان 42px */
+    font-weight:900;
+    margin-top:0px;      /* كان 10px (رفعت 10px للأعلى) */
+}
+
+/* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:175px; /* كان 185 */
+    top:175px;
     width:100%;
     text-align:center;
     font-size:36px;
@@ -73,10 +79,10 @@ body{
     color:#1b7f6a;
 }
 
-/* ===== الرقم الوطني (مرفوع 10px) ===== */
+/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:255px; /* كان 265 */
+    top:255px;
     width:100%;
     text-align:center;
     font-size:22px;
@@ -107,19 +113,17 @@ body{
     font-weight:700;
 }
 
-/* التاريخ (نزل 20px + يمين 100px) */
 .date{
     position:absolute;
-    right:200px; /* كان 100 */
-    top:20px;    /* كان 0 */
+    right:200px;
+    top:20px;
     font-size:18px;
 }
 
-/* رئيس اللجنة (نزل 20px + يمين 100px) */
 .signature{
     position:absolute;
-    right:400px; /* كان 300 */
-    top:20px;    /* كان 0 */
+    right:400px;
+    top:20px;
     text-align:center;
     font-size:18px;
 }
@@ -160,7 +164,6 @@ button{
     </div>
 
     <div class="name">{{ user.full_name }}</div>
-
     <div class="national">رقم وطني : {{ user.national_id }}</div>
 
     <div class="content">
@@ -175,7 +178,6 @@ button{
 
     <div class="footer">
         <div class="date">التاريخ : {{ today }}</div>
-
         <div class="signature">
             رئيس اللجنة
             <div class="line"></div>
