@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>شهادة سكن</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800;900&display=swap" rel="stylesheet">
 
 <style>
 *{
@@ -22,9 +22,9 @@ body{
     align-items:center;
 }
 
-#alert-msg {
-    max-width:1000px;
-    width:100%;
+#alert-msg{
+    width:1000px;
+    max-width:100%;
     background:#ffeb3b;
     color:#000;
     font-weight:bold;
@@ -32,97 +32,120 @@ body{
     padding:10px;
     margin-bottom:15px;
     border-radius:8px;
-    font-size:16px;
-    box-sizing:border-box;
 }
 
 #certificate{
     width:1000px;
-    max-width:100%;
-    height:auto;
-    aspect-ratio:1000/560;
+    height:560px;
     position:relative;
-    overflow:hidden;
     background:#fff;
-    box-sizing:border-box;
+    overflow:hidden;
 }
 
 #certificate img.bg{
     position:absolute;
-    top:0;
-    left:0;
+    inset:0;
     width:100%;
     height:100%;
     object-fit:cover;
     pointer-events:none;
 }
 
+/* ===== العناوين ===== */
+.header{
+    position:absolute;
+    top:30px;
+    width:100%;
+    text-align:center;
+    color:#1b7f6a;
+}
+
+.header .state{ font-size:24px; font-weight:700; }
+.header .committee{ font-size:22px; margin-top:5px; }
+.header .title{
+    font-size:42px;
+    font-weight:900;
+    margin-top:10px;
+}
+
+/* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:201px; /* رفع 5px */
-    left:0;
-    right:0;
+    top:190px;
+    width:100%;
     text-align:center;
-    font-size:38px;
-    font-weight:600;
+    font-size:36px;
+    font-weight:800;
     color:#1b7f6a;
 }
 
+.name-line{
+    position:absolute;
+    top:235px;
+    width:400px;
+    height:4px;
+    background:#1b7f6a;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+/* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:291px; /* رفع 5px */
-    right:520px;
+    top:260px;
+    width:100%;
+    text-align:center;
     font-size:22px;
-    font-weight:600;
+    font-weight:700;
     color:#1b7f6a;
     direction:ltr;
-    font-family:Arial, sans-serif;
 }
 
-.date{
+/* ===== نص الشهادة ===== */
+.content{
     position:absolute;
-    bottom:320px;
-    right:530px;
+    top:310px;
+    width:80%;
+    left:10%;
+    text-align:center;
+    font-size:20px;
+    line-height:2;
+    color:#000;
+}
+
+/* ===== التوقيع ===== */
+.footer{
+    position:absolute;
+    bottom:70px;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:0 80px;
     font-size:18px;
-    font-weight:600;
     color:#1b7f6a;
-    direction:ltr;
-    font-family:Arial, sans-serif;
+    font-weight:700;
+}
+
+.signature{
+    text-align:center;
+}
+
+.signature .line{
+    width:200px;
+    height:3px;
+    background:#1b7f6a;
+    margin:8px auto;
 }
 
 button{
     margin-top:20px;
-    padding:12px 25px;
+    padding:12px 30px;
     border:none;
     border-radius:10px;
     background:#1b7f6a;
     color:#fff;
-    cursor:pointer;
     font-size:16px;
-}
-
-@media(max-width:768px){
-    .name{
-        font-size:28px;
-        top:150px;
-    }
-    .national{
-        font-size:18px;
-        top:220px;
-        right:50px;
-    }
-    .date{
-        font-size:16px;
-        bottom:50px;
-        right:20px;
-    }
-    #certificate{
-        height:auto;
-        aspect-ratio:1000/560;
-    }
-    #alert-msg{
-        font-size:14px;
-    }
+    cursor:pointer;
 }
 </style>
 </head>
@@ -130,14 +153,46 @@ button{
 <body>
 
 <div id="alert-msg">
-🔔 التحذير: الشهادة لا تعتمد رسمياً إلا بعد توقيع رئيس اللجنة عليها. يرجى تنزيلها وطباعتها ملونة وإحضارها لرئيس اللجنة لاعتمادها.
+🔔 تنبيه: الشهادة لا تعتمد رسميًا إلا بعد توقيع رئيس اللجنة وختمها.
 </div>
 
 <div id="certificate">
     <img src="/static/images/certificate_bg.jpg" class="bg">
-    <div class="name" id="name">{{ user.full_name }}</div>
-    <div class="national" id="nid">{{ user.national_id }}</div>
-    <div class="date" id="date">{{ today }}</div>
+
+    <div class="header">
+        <div class="state">ولاية نهر النيل</div>
+        <div class="committee">لجنة قرية مديسيسة</div>
+        <div class="title">شهادة سكن</div>
+    </div>
+
+    <div class="name">{{ user.full_name }}</div>
+    <div class="name-line"></div>
+
+    <div class="national">
+        رقم وطني : {{ user.national_id }}
+    </div>
+
+    <div class="content">
+        نشهد نحن لجنة قرية مديسيسة بأن المذكور أعلاه من سكان قرية مديسيسة،
+        ومقيم بها إقامة دائمة ومعروف لدى أهالي القرية.
+        <br><br>
+        وقد حررت هذه الشهادة بناءً على طلبه، لتقديمها للجهة التي يطلبها،
+        دون أدنى مسؤولية على لجنة القرية.
+        <br><br>
+        وتفضلوا بقبول فائق الاحترام …
+    </div>
+
+    <div class="footer">
+        <div class="date">
+            التاريخ : {{ today }}
+        </div>
+
+        <div class="signature">
+            رئيس اللجنة
+            <div class="line"></div>
+            عثمان يوسف العمدة
+        </div>
+    </div>
 </div>
 
 <button onclick="downloadPDF()">تحميل الشهادة PDF</button>
@@ -148,24 +203,17 @@ button{
 <script>
 async function downloadPDF(){
     const { jsPDF } = window.jspdf;
-
     const cert = document.getElementById("certificate");
-    const name = document.getElementById("name");
-    const nid  = document.getElementById("nid");
-    const date = document.getElementById("date");
 
-    // إخفاء التنبيه أثناء أخذ الصورة
-    const alertMsg = document.getElementById("alert-msg");
-    alertMsg.style.display = "none";
+    document.getElementById("alert-msg").style.display="none";
 
-    // التقاط الشهادة بدقة عالية
-    const canvas = await html2canvas(cert, {
+    const canvas = await html2canvas(cert,{
         scale:4,
         useCORS:true,
         backgroundColor:"#fff"
     });
 
-    const imgData = canvas.toDataURL("image/png", 1.0);
+    const imgData = canvas.toDataURL("image/png",1.0);
 
     const pdf = new jsPDF({
         orientation:"landscape",
@@ -173,30 +221,12 @@ async function downloadPDF(){
         format:[1000,560]
     });
 
-    // إضافة صورة الشهادة
-    pdf.addImage(imgData, "PNG", 0, 0, 1000, 560);
-
-    // كتابة النصوص Vector مرة واحدة فقط داخل حدود PDF
-    pdf.setTextColor(27,127,106);
-    pdf.setFont("Helvetica","bold");
-
-    pdf.setFontSize(38);
-    pdf.text(name.innerText, 500, 201, { align:"center" }); // رفع الاسم 5px
-
-    pdf.setFontSize(22);
-    pdf.text(nid.innerText, 540, 291); // رفع الرقم الوطني 5px
-
-    pdf.setFontSize(18);
-    pdf.text(date.innerText, 430, 560); // التاريخ 400px للأسفل + 100px للشمال داخل حدود PDF
-
-    // تحميل PDF
+    pdf.addImage(imgData,"PNG",0,0,1000,560);
     pdf.save("شهادة_سكن_مديسيسة.pdf");
 
-    // إعادة عرض التنبيه
-    alertMsg.style.display = "block";
+    document.getElementById("alert-msg").style.display="block";
 }
 </script>
-
 
 </body>
 </html>
