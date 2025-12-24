@@ -99,39 +99,38 @@ body{
 .content{
     position:absolute;
     top:300px;
-    width:78%;
-    left:11%;
+    width:780px;
+    left:50%;
+    transform:translateX(-50%);
     text-align:center;
     font-size:18px;
     line-height:1.4;
     color:#000;
 }
 
-/* ===== التوقيع (مضبوط نهائيًا) ===== */
+/* ===== التوقيع (نهائي – داخل الحدود) ===== */
 .footer{
     position:absolute;
-    bottom:50px;
-    width:100%;
-    height:120px;
+    bottom:45px;
+    width:780px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
     color:#1b7f6a;
     font-weight:700;
 }
 
-/* التاريخ (يمين – داخل الشهادة) */
-.date{
-    position:absolute;
-    right:100px;   /* داخل الشهادة */
-    top:0;
-    font-size:18px;
+/* المسافة بين التاريخ ورئيس اللجنة = 500px */
+.signature{
+    width:140px;
+    text-align:center;
 }
 
-/* رئيس اللجنة (يسار التاريخ بـ 200px) */
-.signature{
-    position:absolute;
-    right:300px;   /* 100 + 200 = 300 */
-    top:0;
+.date{
+    width:140px;
     text-align:center;
-    font-size:18px;
 }
 
 .signature .line{
@@ -185,12 +184,15 @@ button{
     </div>
 
     <div class="footer">
-        <div class="date">التاريخ : {{ today }}</div>
-
         <div class="signature">
             رئيس اللجنة
             <div class="line"></div>
             عثمان يوسف العمدة
+        </div>
+
+        <div class="date">
+            التاريخ<br>
+            {{ today }}
         </div>
     </div>
 </div>
