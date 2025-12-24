@@ -62,10 +62,10 @@ body{
 .header .committee{ font-size:22px; margin-top:5px; }
 .header .title{ font-size:42px; font-weight:900; margin-top:10px; }
 
-/* ===== الاسم ===== */
+/* ===== الاسم (مرفوع 10px) ===== */
 .name{
     position:absolute;
-    top:185px;
+    top:175px; /* كان 185 */
     width:100%;
     text-align:center;
     font-size:36px;
@@ -73,12 +73,10 @@ body{
     color:#1b7f6a;
 }
 
-
-
-/* ===== الرقم الوطني ===== */
+/* ===== الرقم الوطني (مرفوع 10px) ===== */
 .national{
     position:absolute;
-    top:265px;
+    top:255px; /* كان 265 */
     width:100%;
     text-align:center;
     font-size:22px;
@@ -99,7 +97,7 @@ body{
     color:#000;
 }
 
-/* ===== التوقيع (مضبوط نهائيًا) ===== */
+/* ===== التوقيع ===== */
 .footer{
     position:absolute;
     bottom:50px;
@@ -109,19 +107,19 @@ body{
     font-weight:700;
 }
 
-/* التاريخ (يمين – داخل الشهادة) */
+/* التاريخ (نزل 20px + يمين 100px) */
 .date{
     position:absolute;
-    right:100px;   /* داخل الشهادة */
-    top:0;
+    right:200px; /* كان 100 */
+    top:20px;    /* كان 0 */
     font-size:18px;
 }
 
-/* رئيس اللجنة (يسار التاريخ بـ 200px) */
+/* رئيس اللجنة (نزل 20px + يمين 100px) */
 .signature{
     position:absolute;
-    right:300px;   /* 100 + 200 = 300 */
-    top:0;
+    right:400px; /* كان 300 */
+    top:20px;    /* كان 0 */
     text-align:center;
     font-size:18px;
 }
@@ -162,7 +160,6 @@ button{
     </div>
 
     <div class="name">{{ user.full_name }}</div>
-  
 
     <div class="national">رقم وطني : {{ user.national_id }}</div>
 
