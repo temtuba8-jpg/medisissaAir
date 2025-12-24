@@ -79,7 +79,7 @@ body{
     width:360px;
     height:4px;
     background:#1b7f6a;
-    left:52%;
+    left:50%;
     transform:translateX(-50%);
 }
 
@@ -103,31 +103,35 @@ body{
     left:11%;
     text-align:center;
     font-size:18px;
-    line-height:1.4; /* أقل مسافة ممكنة */
+    line-height:1.4;
     color:#000;
 }
 
-/* ===== التوقيع ===== */
+/* ===== التوقيع (مضبوط نهائيًا) ===== */
 .footer{
     position:absolute;
     bottom:50px;
     width:100%;
-    font-size:18px;
+    height:120px;
     color:#1b7f6a;
     font-weight:700;
 }
 
+/* التاريخ (يمين – داخل الشهادة) */
 .date{
     position:absolute;
-    right:60px;     /* داخل الشهادة */
-    right:-30px;    /* تحريك يمين 30px */
+    right:100px;   /* داخل الشهادة */
+    top:0;
+    font-size:18px;
 }
 
+/* رئيس اللجنة (يسار التاريخ بـ 200px) */
 .signature{
     position:absolute;
-    left:60px;      /* داخل الشهادة */
-    left:-100px;    /* تحريك شمال 100px */
+    right:300px;   /* 100 + 200 = 300 */
+    top:0;
     text-align:center;
+    font-size:18px;
 }
 
 .signature .line{
