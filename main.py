@@ -762,11 +762,55 @@ def pay_service():
         "new_balance": result,
         "redirect_url": redirect_map.get(service_name, "/user")
     }
+#========
+@app.route("/certificate/school")
+def certificate_school():
+    if "user" not in session:
+        flash("❌ يجب تسجيل الدخول")
+        return redirect(url_for("login"))
+
+    db = get_db()
+    users_col = db.users
+    username = session["user"]["username"]
+
+    user = users_col.find_one({"username": username})
+    if not user:
+        flash("❌ المستخدم غير موجود")
+        return redirect(url_for("login"))
+
+    # =============================
+    # خصم 10 عملات مرة واحدة فقط للشهادة المدرسية
+    # =============================
+    if not session.get("school_certificate_paid"):
+        success, result = deduct_coins_for_service(username, db, "🎓 شهادة مدرسية")
+
+        if not success:
+            return render_template(
+                "user.html",
+                user=user,
+                error_message=f"❌ {result}"
+            )
+
+        # حفظ أن الخصم تم
+        session["school_certificate_paid"] = True
+
+        # تحديث الرصيد في بيانات المستخدم
+        user["balance"] = result
+
+    today = date.today().strftime("%Y/%m/%d")
+
+    return render_template(
+        "certificate_school.html",
+        user=user,
+        today=today,
+        balance_after=user.get("balance")
+    )
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
