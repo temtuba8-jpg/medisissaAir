@@ -71,7 +71,7 @@ body{
 /* ===== الاسم ===== */
 .name{
     position:absolute;
-    top:190px;
+    top:185px;
     width:100%;
     text-align:center;
     font-size:36px;
@@ -79,20 +79,21 @@ body{
     color:#1b7f6a;
 }
 
+/* خط الاسم */
 .name-line{
     position:absolute;
-    top:235px;
-    width:400px;
+    top:240px;            /* نزلناه تحت الاسم */
+    width:360px;
     height:4px;
     background:#1b7f6a;
-    left:50%;
+    left:52%;             /* انحراف بسيط يمين */
     transform:translateX(-50%);
 }
 
 /* ===== الرقم الوطني ===== */
 .national{
     position:absolute;
-    top:260px;
+    top:265px;
     width:100%;
     text-align:center;
     font-size:22px;
@@ -104,23 +105,23 @@ body{
 /* ===== نص الشهادة ===== */
 .content{
     position:absolute;
-    top:310px;
-    width:80%;
-    left:10%;
+    top:305px;          /* رفع المحتوى */
+    width:78%;
+    left:11%;
     text-align:center;
-    font-size:20px;
-    line-height:2;
+    font-size:18px;     /* تقليل حجم الخط */
+    line-height:1.9;
     color:#000;
 }
 
 /* ===== التوقيع ===== */
 .footer{
     position:absolute;
-    bottom:70px;
+    bottom:55px;        /* دخل للداخل */
     width:100%;
     display:flex;
     justify-content:space-between;
-    padding:0 80px;
+    padding:0 120px;    /* دخل يمين وشمال */
     font-size:18px;
     color:#1b7f6a;
     font-weight:700;
@@ -131,7 +132,7 @@ body{
 }
 
 .signature .line{
-    width:200px;
+    width:180px;
     height:3px;
     background:#1b7f6a;
     margin:8px auto;
