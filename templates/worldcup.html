@@ -166,20 +166,33 @@ body{
 const video = document.getElementById('liveVideo');
 const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
-if(Hls.isSupported()) {
-    const hls = new Hls();
+// تأكد من وجود HLS على المتصفح
+if (Hls.isSupported()) {
+    const hls = new Hls({
+        autoStartLoad: true,
+        debug: true // لإظهار الأخطاء في console
+    });
+
     hls.loadSource(streamURL);
     hls.attachMedia(video);
+
     hls.on(Hls.Events.MANIFEST_PARSED, function() {
         video.play().catch(err => console.log('Video play error:', err));
     });
-} else if(video.canPlayType('application/vnd.apple.mpegurl')) {
+
+    hls.on(Hls.Events.ERROR, function(event, data) {
+        console.error('HLS.js error:', data);
+    });
+
+} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    // متصفح Safari أو iOS
     video.src = streamURL;
     video.addEventListener('loadedmetadata', function() {
         video.play().catch(err => console.log('Video play error:', err));
     });
 }
 </script>
+
 
 </body>
 </html>
