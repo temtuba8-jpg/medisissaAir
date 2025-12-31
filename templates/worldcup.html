@@ -70,13 +70,29 @@ body{
     box-shadow:0 10px 25px rgba(0,0,0,.35);
 }
 
-.video-box iframe{
+#liveVideo{
     position:absolute;
     top:0;
     left:0;
     width:100%;
     height:100%;
     border:none;
+    border-radius:18px;
+}
+
+/* ===== شعار البث المباشر ===== */
+.live-badge{
+    position:absolute;
+    top:10px;
+    left:10px;
+    background:red;
+    color:white;
+    padding:5px 12px;
+    font-weight:bold;
+    font-size:14px;
+    border-radius:6px;
+    z-index:10;
+    box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 
 /* ===== تنبيه ===== */
@@ -140,13 +156,8 @@ body{
 <!-- مشغل الفيديو -->
 <div class="player-wrapper">
     <div class="video-box">
-  <iframe 
-    src="https://www.youtube.com/embed/QWMaZO-q64c?rel=0&modestbranding=1&autoplay=1&controls=0&showinfo=0&mute=1" 
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-    allowfullscreen>
-</iframe>
-
-
+        <div class="live-badge">🔴 بث مباشر</div>
+        <video id="liveVideo" controls autoplay muted></video>
     </div>
 </div>
 
@@ -161,6 +172,26 @@ body{
     <button onclick="location.reload()">🔄 تحديث البث</button>
     <button onclick="history.back()">⬅️ رجوع</button>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+    const video = document.getElementById('liveVideo');
+    const streamURL = 'http://127.0.0.1/live/stream1.m3u8'; // عدل إلى IP السيرفر العام إذا لزم
+
+    if(Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(streamURL);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            video.play();
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamURL;
+        video.addEventListener('loadedmetadata', function() {
+            video.play();
+        });
+    }
+</script>
 
 </body>
 </html>
