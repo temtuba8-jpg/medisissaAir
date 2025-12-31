@@ -166,32 +166,28 @@ body{
 const video = document.getElementById('liveVideo');
 const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
-// تأكد من وجود HLS على المتصفح
 if (Hls.isSupported()) {
-    const hls = new Hls({
-        autoStartLoad: true,
-        debug: true // لإظهار الأخطاء في console
-    });
-
+    const hls = new Hls({ debug: true, enableWorker: true });
     hls.loadSource(streamURL);
     hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-        video.play().catch(err => console.log('Video play error:', err));
+    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        video.play().catch(err => console.error("Play error:", err));
     });
 
-    hls.on(Hls.Events.ERROR, function(event, data) {
-        console.error('HLS.js error:', data);
+    hls.on(Hls.Events.ERROR, (event, data) => {
+        console.error("HLS.js error:", data);
     });
-
 } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    // متصفح Safari أو iOS
     video.src = streamURL;
-    video.addEventListener('loadedmetadata', function() {
-        video.play().catch(err => console.log('Video play error:', err));
+    video.addEventListener('loadedmetadata', () => {
+        video.play().catch(err => console.error("Play error:", err));
     });
+} else {
+    console.error("HLS not supported in this browser");
 }
 </script>
+
 
 
 </body>
