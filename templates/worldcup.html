@@ -147,7 +147,7 @@ body{
 <div class="player-wrapper">
     <div class="video-box">
         <div class="live-badge">🔴 بث مباشر</div>
-        <video id="liveVideo" controls autoplay muted></video>
+        <video id="liveVideo" controls autoplay muted playsinline></video>
     </div>
 </div>
 
@@ -161,24 +161,24 @@ body{
     <button onclick="history.back()">⬅️ رجوع</button>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0"></script>
 <script>
-    const video = document.getElementById('liveVideo');
-    const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
+const video = document.getElementById('liveVideo');
+const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
-    if(Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(streamURL);
-        hls.attachMedia(video);
-        hls.on(Hls.Events.MANIFEST_PARSED, function() {
-            video.play();
-        });
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = streamURL;
-        video.addEventListener('loadedmetadata', function() {
-            video.play();
-        });
-    }
+if(Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(streamURL);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+        video.play().catch(err => console.log('Video play error:', err));
+    });
+} else if(video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = streamURL;
+    video.addEventListener('loadedmetadata', function() {
+        video.play().catch(err => console.log('Video play error:', err));
+    });
+}
 </script>
 
 </body>
