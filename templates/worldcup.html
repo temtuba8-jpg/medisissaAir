@@ -15,7 +15,6 @@ body{
     color:#330000;
 }
 
-/* ===== الشريط العلوي ===== */
 .top-bar{
     background:#7a0000;
     color:#fff;
@@ -43,7 +42,6 @@ body{
     font-size:14px;
 }
 
-/* ===== عنوان الصفحة ===== */
 .page-title{
     text-align:center;
     margin:20px 10px;
@@ -54,7 +52,6 @@ body{
     color:#7a0000;
 }
 
-/* ===== مشغل البث ===== */
 .player-wrapper{
     max-width:900px;
     margin:0 auto 30px;
@@ -63,7 +60,7 @@ body{
 
 .video-box{
     position:relative;
-    padding-top:56.25%; /* نسبة 16:9 */
+    padding-top:56.25%;
     background:#000;
     border-radius:18px;
     overflow:hidden;
@@ -80,7 +77,6 @@ body{
     border-radius:18px;
 }
 
-/* ===== شعار البث المباشر ===== */
 .live-badge{
     position:absolute;
     top:10px;
@@ -95,7 +91,6 @@ body{
     box-shadow:0 2px 6px rgba(0,0,0,.5);
 }
 
-/* ===== تنبيه ===== */
 .notice{
     max-width:900px;
     margin:15px auto;
@@ -106,7 +101,6 @@ body{
     font-size:14px;
 }
 
-/* ===== أزرار التحكم ===== */
 .controls{
     text-align:center;
     margin-bottom:30px;
@@ -123,7 +117,6 @@ body{
     box-shadow:0 5px 15px rgba(0,0,0,.3);
 }
 
-/* ===== موبايل ===== */
 @media(max-width:600px){
     .page-title h1{
         font-size:20px;
@@ -134,7 +127,6 @@ body{
 
 <body>
 
-<!-- الشريط العلوي -->
 <div class="top-bar">
     <div class="logo">
         <img src="static/images/logo.png" alt="نادي مديسيسة">
@@ -147,13 +139,11 @@ body{
     </div>
 </div>
 
-<!-- العنوان -->
 <div class="page-title">
     <h1>🏆 البث المباشر – كأس العالم 2026</h1>
     <p>مشاهدة حصرية لأعضاء نادي مديسيسة</p>
 </div>
 
-<!-- مشغل الفيديو -->
 <div class="player-wrapper">
     <div class="video-box">
         <div class="live-badge">🔴 بث مباشر</div>
@@ -161,13 +151,11 @@ body{
     </div>
 </div>
 
-<!-- تنبيه -->
 <div class="notice">
     ⚠️ في حال توقف البث، يرجى تحديث الصفحة.  
     البث مخصص لأعضاء نادي مديسيسة فقط.
 </div>
 
-<!-- أزرار -->
 <div class="controls">
     <button onclick="location.reload()">🔄 تحديث البث</button>
     <button onclick="history.back()">⬅️ رجوع</button>
@@ -176,7 +164,7 @@ body{
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script>
     const video = document.getElementById('liveVideo');
-    const streamURL = 'http://94.99.36.154/live/stream1.m3u8'; // عدل إلى IP السيرفر العام إذا لزم
+    const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
     if(Hls.isSupported()) {
         const hls = new Hls();
