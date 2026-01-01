@@ -811,7 +811,7 @@ from flask import Flask, Response
 
 #app = Flask(__name__)
 
-NGROK_BASE = "https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/"
+NGROK_BASE = "https://semihardened-freeman-incorruptibly.ngrok-free.dev/"
 
 @app.route("/proxy/<path:filename>")
 def proxy_file(filename):
@@ -835,6 +835,7 @@ def proxy_file(filename):
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
