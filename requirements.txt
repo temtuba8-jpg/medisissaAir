@@ -3,5 +3,7 @@ pymongo==4.7.1
 qrcode==7.4.2
 python-dotenv==1.1.1
 gunicorn
+requests==2.32.0
+
 
 
