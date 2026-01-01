@@ -169,6 +169,8 @@ const notice = document.getElementById('notice');
 const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
 function startHLS() {
+    notice.innerText = "🔄 جاري تحميل البث...";
+    
     if (Hls.isSupported()) {
         const hls = new Hls({ debug: false, enableWorker: true });
         hls.loadSource(streamURL);
@@ -181,9 +183,11 @@ function startHLS() {
 
         hls.on(Hls.Events.ERROR, (event, data) => {
             console.error("HLS.js error:", data);
-            notice.innerText = "⚠️ البث لم يبدأ بعد، سيتم إعادة المحاولة تلقائيًا...";
-            setTimeout(() => hls.loadSource(streamURL), 5000); // retry
+            notice.style.display = "block";
+            notice.innerText = "⚠️ فشل البث، سيتم إعادة المحاولة تلقائيًا...";
+            setTimeout(() => startHLS(), 5000); // إعادة التشغيل بالكامل
         });
+
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = streamURL;
         video.addEventListener('loadedmetadata', () => {
@@ -191,13 +195,13 @@ function startHLS() {
             notice.style.display = "none";
         });
     } else {
-        notice.innerText = "⚠️ متصفحك لا يدعم HLS، يرجى استخدام متصفح حديث.";
+        notice.innerText = "❌ متصفحك لا يدعم HLS، يرجى استخدام متصفح حديث.";
         console.error("HLS not supported in this browser");
     }
 }
 
 startHLS();
 </script>
-    
+
 </body>
 </html>
