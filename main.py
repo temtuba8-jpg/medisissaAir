@@ -805,11 +805,33 @@ def certificate_school():
         today=today,
         balance_after=user.get("balance")
     )
+#=====================
+import requests
+from flask import Response
+
+NGROK_STREAM = "https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8"
+
+@app.route("/proxy/stream.m3u8")
+def proxy_stream():
+    """
+    Proxy لمشاهدة بث كأس العالم من ngrok بدون مشاكل CORS
+    """
+    try:
+        r = requests.get(NGROK_STREAM, stream=True, timeout=10)
+        headers = {
+            "Content-Type": r.headers.get("Content-Type", "application/vnd.apple.mpegurl"),
+            "Access-Control-Allow-Origin": "*"
+        }
+        return Response(r.iter_content(chunk_size=1024), headers=headers)
+    except Exception as e:
+        return f"❌ خطأ في البث: {e}", 500
+
 
 # تشغيل السيرفر
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
