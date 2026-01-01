@@ -99,6 +99,7 @@ body{
     border-radius:12px;
     box-shadow:0 5px 15px rgba(0,0,0,.15);
     font-size:14px;
+    text-align:center;
 }
 
 .controls{
@@ -151,7 +152,7 @@ body{
     </div>
 </div>
 
-<div class="notice">
+<div class="notice" id="notice">
     ⚠️ في حال توقف البث، يرجى تحديث الصفحة.  
     البث مخصص لأعضاء نادي مديسيسة فقط.
 </div>
@@ -164,30 +165,39 @@ body{
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0"></script>
 <script>
 const video = document.getElementById('liveVideo');
+const notice = document.getElementById('notice');
 const streamURL = 'https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/stream1.m3u8';
 
-if (Hls.isSupported()) {
-    const hls = new Hls({ debug: true, enableWorker: true });
-    hls.loadSource(streamURL);
-    hls.attachMedia(video);
+function startHLS() {
+    if (Hls.isSupported()) {
+        const hls = new Hls({ debug: false, enableWorker: true });
+        hls.loadSource(streamURL);
+        hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(err => console.error("Play error:", err));
-    });
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            video.play().catch(err => console.error("Play error:", err));
+            notice.style.display = "none";
+        });
 
-    hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error("HLS.js error:", data);
-    });
-} else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = streamURL;
-    video.addEventListener('loadedmetadata', () => {
-        video.play().catch(err => console.error("Play error:", err));
-    });
-} else {
-    console.error("HLS not supported in this browser");
+        hls.on(Hls.Events.ERROR, (event, data) => {
+            console.error("HLS.js error:", data);
+            notice.innerText = "⚠️ البث لم يبدأ بعد، سيتم إعادة المحاولة تلقائيًا...";
+            setTimeout(() => hls.loadSource(streamURL), 5000); // retry
+        });
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = streamURL;
+        video.addEventListener('loadedmetadata', () => {
+            video.play().catch(err => console.error("Play error:", err));
+            notice.style.display = "none";
+        });
+    } else {
+        notice.innerText = "⚠️ متصفحك لا يدعم HLS، يرجى استخدام متصفح حديث.";
+        console.error("HLS not supported in this browser");
+    }
 }
+
+startHLS();
 </script>
     
 </body>
 </html>
-
