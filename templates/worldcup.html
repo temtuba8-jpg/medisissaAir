@@ -164,43 +164,45 @@ body{
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0"></script>
 <script>
-const video = document.getElementById('liveVideo');
-const notice = document.getElementById('notice');
-const streamURL = '/proxy/stream1.m3u8';
+window.onload = function() {
+    const video = document.getElementById('liveVideo');
+    const notice = document.getElementById('notice');
+    const streamURL = '/proxy/stream.m3u8';
 
-function startHLS() {
-    notice.innerText = "🔄 جاري تحميل البث...";
-    
-    if (Hls.isSupported()) {
-        const hls = new Hls({ debug: false, enableWorker: true });
-        hls.loadSource(streamURL);
-        hls.attachMedia(video);
+    function startHLS() {
+        notice.innerText = "🔄 جاري تحميل البث...";
 
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(err => console.error("Play error:", err));
-            notice.style.display = "none";
-        });
+        if (Hls.isSupported()) {
+            const hls = new Hls({ debug: false, enableWorker: true });
+            hls.loadSource(streamURL);
+            hls.attachMedia(video);
 
-        hls.on(Hls.Events.ERROR, (event, data) => {
-            console.error("HLS.js error:", data);
-            notice.style.display = "block";
-            notice.innerText = "⚠️ فشل البث، سيتم إعادة المحاولة تلقائيًا...";
-            setTimeout(() => startHLS(), 5000); // إعادة التشغيل بالكامل
-        });
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                video.play().catch(err => console.error("Play error:", err));
+                notice.style.display = "none";
+            });
 
-    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = streamURL;
-        video.addEventListener('loadedmetadata', () => {
-            video.play().catch(err => console.error("Play error:", err));
-            notice.style.display = "none";
-        });
-    } else {
-        notice.innerText = "❌ متصفحك لا يدعم HLS، يرجى استخدام متصفح حديث.";
-        console.error("HLS not supported in this browser");
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error("HLS.js error:", data);
+                notice.style.display = "block";
+                notice.innerText = "⚠️ فشل البث، سيتم إعادة المحاولة تلقائيًا...";
+                setTimeout(() => startHLS(), 5000); // إعادة التشغيل بالكامل
+            });
+
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = streamURL;
+            video.addEventListener('loadedmetadata', () => {
+                video.play().catch(err => console.error("Play error:", err));
+                notice.style.display = "none";
+            });
+        } else {
+            notice.innerText = "❌ متصفحك لا يدعم HLS، يرجى استخدام متصفح حديث.";
+            console.error("HLS not supported in this browser");
+        }
     }
-}
 
-startHLS();
+    startHLS();
+};
 </script>
 
 </body>
