@@ -805,23 +805,25 @@ def certificate_school():
         today=today,
         balance_after=user.get("balance")
     )
-#=====================
-import requests
-from flask import Flask, Response
+#=====================import requests
+from flask import Response
 
-#app = Flask(__name__)
-
-NGROK_BASE = "https://semihardened-freeman-incorruptibly.ngrok-free.dev/live/"
-
+# ضع هنا رابط البث المباشر من VMIX أو Cloudflare Tunnel
+CLOUDFLARE_BASE = "https://ozone-gourmet-char-automobiles.trycloudflare.com/live/"
 
 @app.route("/proxy/<path:filename>")
 def proxy_file(filename):
     """
-    Proxy لكل ملفات HLS (.m3u8 و .ts) من ngrok مع CORS
+    Proxy لكل ملفات HLS (.m3u8 و .ts) من Cloudflare / VMIX مع CORS
     """
     try:
-        url = f"{NGROK_BASE}{filename}"
+        # رابط الملف المطلوب من السيرفر الأصلي
+        url = f"{CLOUDFLARE_BASE}{filename}"
+
+        # جلب الملف كبايتات
         r = requests.get(url, stream=True, timeout=10)
+
+        # إعادة الملف للمتصفح مع السماح لـ CORS
         headers = {
             "Content-Type": r.headers.get("Content-Type", "application/octet-stream"),
             "Access-Control-Allow-Origin": "*"
@@ -836,6 +838,7 @@ def proxy_file(filename):
 #============================
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
 
 
 
